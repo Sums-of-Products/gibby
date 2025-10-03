@@ -17,7 +17,7 @@ Additionally, a **pruning technique** can be integrated to discard low-scoring p
 `sample.cpp` runs the algorithm, and contains instructions for adjusting parameters. The algorithm accepts either: 
 
 - **Discrete data**, or  
-- **Local-score files** in [GOBNILP](https://www.cs.york.ac.uk/aig/sw/gobnilp/) format (also for continuous or mixed data)
+- **Local-score files** using [GOBNILP](https://www.cs.york.ac.uk/aig/sw/gobnilp/) format (also for continuous or mixed data)
 
 The folder `data` contains the datasets used in the experiments.
 
