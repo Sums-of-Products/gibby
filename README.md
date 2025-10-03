@@ -7,8 +7,8 @@
 Gibby combines several moves to efficiently explore the DAG space:  
 
 - **Fast Gibby** 
-- **New Edge Reversal (REV)** 
-- **Markov Blanket Resampling (MBR)** 
+- [New Edge Reversal](https://link.springer.com/article/10.1007/s10994-008-5057-7) **(REV)** 
+- [Markov Blanket Resampling](https://jmlr.org/papers/v17/su16a.html) **(MBR)** 
 
 Additionally, a **pruning technique** can be integrated to discard low-scoring parent sets.
 
