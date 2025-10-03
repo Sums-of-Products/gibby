@@ -27,7 +27,7 @@ The algorithm outputs two files containing:
 - **Sampled DAG scores**  
 - **Edge-probability matrix** (row = parent, column = child)
 
-It is possible to output a file containing the computed local scores. 
+It is also possible to output another file containing the computed local scores. 
 
 ## Language
 
