@@ -6,11 +6,11 @@
 
 Gibby combines several moves to efficiently explore the DAG space:  
 
-- **Fast Gibby** move
-- **New Edge Reversal (REV)** move
-- **Markov Blanket Resampling (MBR)** move
+- **Fast Gibby** 
+- **New Edge Reversal (REV)** 
+- **Markov Blanket Resampling (MBR)** 
 
-Additionally, a **pruning technique** is applied to discard low-scoring parent sets.
+Additionally, a **pruning technique** can be integrated to discard low-scoring parent sets.
 
 ## Input
 
@@ -18,13 +18,14 @@ Additionally, a **pruning technique** is applied to discard low-scoring parent s
 
 - **Discrete data**, or  
 - **Local-score files** in **GOBNILP** format (also for continuous or mixed data)
-- 
+
 The folder `data` contains the datasets used in the experiments.
 
 ## Output
-- The algorithm outputs two files containing:  
-  - **Sampled DAG scores**  
-  - **Edge-probability matrix** (row = parent, columns = child)  
+
+The algorithm outputs two files containing:  
+- **Sampled DAG scores**  
+- **Edge-probability matrix** (row = parent, columns = child)  
 
 ## Language
 
