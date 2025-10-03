@@ -8,15 +8,15 @@ Gibby is a MCMC algorithm that samples DAGs from the posterior distribution. Inp
 
 This project is implemented in **C++**.
 
-## Compilation
+## Compilation and execution
 
-To compile the program using **g++**, run:
+To compile the program using **g++**, run
 
 ```bash
 g++ -std=c++17 -march=native -O3 -o sample sample.cpp
 ```
 
-Once compiled, run using command
+Once compiled, execute it using
 
 ```bash
 ./sample
