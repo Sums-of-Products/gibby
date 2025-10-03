@@ -13,7 +13,7 @@ This project is implemented in **C++**.
 To compile the program using **g++**, run:
 
 ```bash
-g++ -std=c++17 -march=native -O3 -o sample sample.cpp'''
+g++ -std=c++17 -march=native -O3 -o sample sample.cpp```
 
 Once compiled, run using command
 
