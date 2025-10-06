@@ -4,7 +4,7 @@
 
 ## Algorithm
 
-Gibby combines several moves to efficiently explore the DAG space:  
+Gibby combines several moves to efficiently explore the space of DAGs:  
 
 - **Fast Gibby** 
 - [New Edge Reversal](https://link.springer.com/article/10.1007/s10994-008-5057-7) **(REV)** 
