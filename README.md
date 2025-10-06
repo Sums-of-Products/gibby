@@ -24,7 +24,7 @@ The folder `data` contains the datasets used in the experiments.
 ## Output
 
 The algorithm outputs two files containing:  
-- **Sampled DAG scores**  
+- **Sampled DAGs scores**  
 - **Edge-probability matrix** (row = parent, column = child)
 
 It is also possible to output another file containing the computed local scores. 
