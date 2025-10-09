@@ -1,6 +1,6 @@
 # Gibby
 
-**Gibby** is an MCMC algorithm that samples directed acyclic graphs (DAGs) from the posterior distribution.  
+**Gibby** is an highly optimized MCMC algorithm that samples directed acyclic graphs (DAGs) from the posterior distribution.  
 
 ## Algorithm
 
