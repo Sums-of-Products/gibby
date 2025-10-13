@@ -12,6 +12,29 @@ Gibby combines several moves to efficiently explore the space of DAGs:
 
 Additionally, a **pruning technique** can be integrated to discard low-scoring parent sets during the computation of local scores.
 
+## Compilation, selection of parameters, and execution
+
+This project is implemented in **C++**. To compile `sample.cpp` using **g++**, run
+
+```bash
+g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
+```
+
+The mandatory parameters are the data file (the datasets used in the experiments are  in the data folder) and the number of main iterations of the MCMC algorithm. For example, run
+
+```bash
+./gibby  data/asia1k.dat -iter 1000
+```
+
+Optional parameters are 
+
+        -a accuracy		                The number of significant bits in approximations (default 15)
+        -d maxind		                The maximum indegree parameter (default -1, i.e., infinity)
+        -e ess		                    The ESS parameter of BDeu (default 1.0)
+        -p prior		                The structure prior: 0 uniform, 1 fair, 2 fair+, -w edge(w) (default 1)
+        -K max		                    Maximum number of parents per node (default 0 = unrestricted)
+        
+
 ## Input
 
 `sample.cpp` runs the algorithm, and contains instructions for adjusting parameters. The algorithm accepts either: 
