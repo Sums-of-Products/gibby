@@ -48,6 +48,6 @@ Currently, Gibby supports only discrete data, scored using the BDeu system.
 
 After execution, Gibby produces the following outputs:
 
-- **Scores file** — contains sampled DAG scores over iterations.
-- **Posterior matrix file** — contains the edge probability matrix  (rows = parents, columns = children).
-- **(Optional) Local scores file** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
+- **Sampled DAGs scores** — contains the sampled DAGs scores over iterations.
+- **Edge probability matrix** — contains the posterior probability of the edges  (row = parent, column = child).
+- **(Optional) Parent sets scores** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
