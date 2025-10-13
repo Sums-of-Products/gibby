@@ -33,8 +33,15 @@ Optional parameters are
         -e ess		                    The ESS parameter of BDeu (default 1.0)
         -p prior		                The structure prior: 0 uniform, 1 fair, 2 fair+, -w edge(w) (default 1)
         -K max		                    Maximum number of parents per node (default 0 = unrestricted)
+        -P mode		                    Score pruning: 0 no pruning, 1 top-down, 2 bottom-up (default 0); 
+                                        if preceded by digit k > 0, then only up to min{k, maxind} parents
+        -R seed		                    Seed to the random number generator (default random)
+        -O filen		                Output file name for local scores in the jkl format 
+        -burn in                          number of main burn-in iterations (default iter/10)
+        -FBM                              number of fast basic moves per main iterations (default 10000)
+        -REV                              number of REV moves per main iterations (default 200)
+        -MBR                              number of MBR moves per main iterations (default 200)
         
-
 ## Input
 
 `sample.cpp` runs the algorithm, and contains instructions for adjusting parameters. The algorithm accepts either: 
