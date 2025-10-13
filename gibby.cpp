@@ -12,7 +12,7 @@
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <datafile or -S file> [options]\n";
+        std::cerr << "Usage: " << argv[0] << " <datafile or -I file> [options]\n";
         return 1;
     }
 
@@ -33,15 +33,16 @@ int main(int argc, char* argv[]) {
     int structure_prior = 1;
     int pruning = 2; // bottom-up default
     int s_flag = 1;
+    int M_param = 16; // <-- default 16 GiB
 
     std::string parent_scores_file = "";
     int seed_value = 0;
 
     // --- Detect if shortcut mode ---
-    if (std::string(argv[1]) == "-S") {
+    if (std::string(argv[1]) == "-I") {
         shortcut_mode = true;
         if (argc < 4) {
-            std::cerr << "Error: -S requires a file and -iter <number>\n";
+            std::cerr << "Error: -I requires a file and -iter <number>\n";
             return 1;
         }
         datafile = argv[2];
@@ -54,6 +55,7 @@ int main(int argc, char* argv[]) {
             else if (arg == "-REV" && i + 1 < argc) rev_iter = std::atoi(argv[++i]);
             else if (arg == "-MBR" && i + 1 < argc) mbr_iter = std::atoi(argv[++i]);
             else if (arg == "-a" && i + 1 < argc) sig_bits = std::atoi(argv[++i]);
+            else if (arg == "-M" && i + 1 < argc) M_param = std::atoi(argv[++i]); // added
             else if (arg[0] == '-') i++; // ignore unknown flags
         }
 
@@ -77,6 +79,7 @@ int main(int argc, char* argv[]) {
             else if (arg == "-a" && i + 1 < argc) sig_bits = std::atoi(argv[++i]);
             else if (arg == "-d" && i + 1 < argc) max_indegree = std::atoi(argv[++i]);
             else if (arg == "-K" && i + 1 < argc) max_parents = std::atoi(argv[++i]);
+            else if (arg == "-M" && i + 1 < argc) M_param = std::atoi(argv[++i]); // added
             else if (arg == "-p" && i + 1 < argc) structure_prior = std::atoi(argv[++i]);
             else if (arg == "-P" && i + 1 < argc) pruning = std::atoi(argv[++i]);
             else if (arg == "-R" && i + 1 < argc) seed_value = std::atoi(argv[++i]);
@@ -93,14 +96,16 @@ int main(int argc, char* argv[]) {
     // --- Prepare user_params for DAGsampler ---
     std::string user_params;
     if (shortcut_mode) {
-        user_params = "-S " + datafile + " ";
+        user_params = "-I " + datafile + " ";
         user_params += "-a " + std::to_string(sig_bits) + " ";
+        user_params += "-M " + std::to_string(M_param) + " ";
     } else {
         user_params = "-s " + std::to_string(s_flag) + " ";
         user_params += "-e " + std::to_string(ess) + " ";
         user_params += "-a " + std::to_string(sig_bits) + " ";
         user_params += "-P " + std::to_string(pruning) + " ";
         user_params += "-K " + std::to_string(max_parents) + " ";
+        user_params += "-M " + std::to_string(M_param) + " ";
         user_params += "-R " + std::to_string(seed_value) + " ";
         if (!parent_scores_file.empty())
             user_params += "-O " + parent_scores_file + " ";
@@ -111,7 +116,7 @@ int main(int argc, char* argv[]) {
 
     DAGsampler ds;
     if (shortcut_mode) {
-        ds.init("", true, user_params); // datafile empty; scores file in -S
+        ds.init(user_params);
     } else {
         ds.init(datafile, true, user_params);
     }
@@ -123,13 +128,14 @@ int main(int argc, char* argv[]) {
     std::string score_output = "results/" + base_name + "_R" + std::to_string(seed_value) + "_scores.txt";
     std::string posterior_output = "results/" + base_name + "_R" + std::to_string(seed_value) + "_posterior.txt";
 
-    // --- Summary ---
+    // --- Summary output ---
     if (shortcut_mode) {
         std::cout << "========================================\n";
         std::cout << "        Gibby DAGs sampler  \n";
         std::cout << "========================================\n";
-        std::cout << "Parents sets scores: " << datafile << "\n";
+        std::cout << "Parent sets scores: " << datafile << "\n";
         std::cout << "Number of significant bits in approximations: " << sig_bits << "\n";
+        std::cout << "Amount of RAM available (GiB): " << M_param << "\n";
     } else {
         std::string prior_str = (structure_prior == 0) ? "uniform" :
                                 (structure_prior == 1) ? "fair" :
@@ -153,6 +159,7 @@ int main(int argc, char* argv[]) {
         std::cout << "Score: BDeu (ESS=" << ess << ")\n";
         std::cout.unsetf(std::ios::floatfield);
         std::cout << "Number of significant bits in approximations: " << sig_bits << "\n";
+        std::cout << "Amount of RAM available (GiB): " << M_param << "\n";
     }
 
     // --- Printing block ---
@@ -164,13 +171,13 @@ int main(int argc, char* argv[]) {
     std::cout << "MBR steps per iteration: " << mbr_iter << "\n";
     std::cout << "----------------------------------------\n";
     std::cout << "Output files:\n"
-              << "  Scores -> " << score_output << "\n"
-              << "  Posterior -> " << posterior_output << "\n";
+              << "  Sampled DAGs scores -> " << score_output << "\n"
+              << "  Edge probability matrix -> " << posterior_output << "\n";
     if (!parent_scores_file.empty())
         std::cout << "  Parent sets scores -> " << parent_scores_file << "\n";
     std::cout << "----------------------------------------\n";
 
-    // --- Burn-in ---
+    // --- Burn-in phase ---
     std::cout << "Starting burn-in phase..." << std::endl;
     for (int it = 0; it < burn_in_iter; it++) {
         ds.sGib(gibby_iter);
@@ -179,7 +186,7 @@ int main(int argc, char* argv[]) {
     }
     std::cout << "Burn-in complete.\n";
 
-    // --- Sampling ---
+    // --- Sampling phase ---
     std::ofstream outfile(score_output);
     if (!outfile) {
         std::cerr << "Error: cannot open output file for scores: " << score_output << std::endl;
