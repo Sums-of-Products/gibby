@@ -14,7 +14,7 @@ A **score-pruning technique** can optionally be enabled to discard low-probabili
 
 ## Compilation and Execution
 
-Gibby is implemented in **C++17** and can be compiled with **g++** as follows:
+Gibby is implemented in **C++** and can be compiled with **g++** as follows:
 
 ```bash
 g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
