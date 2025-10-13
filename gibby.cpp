@@ -152,53 +152,55 @@ int main(int argc, char* argv[]) {
         std::cout << "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n";
         std::cout << "┃                               Gibby DAGs Sampler                              ┃\n";
         std::cout << "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n";
-        std::cout << "Dataset: " << datafile << "\n";
-        std::cout << "Random seed (R): " << seed_value << "\n";
-        std::cout << "Max in-degree: " << (max_indegree == -1 ? n_nodes - 1 : max_indegree) << "\n";
-        std::cout << "Maximum number of candidate parents per node: "
+        std::cout << "│ Dataset: " << datafile << "\n";
+        std::cout << "│ Random seed (R): " << seed_value << "\n";
+        std::cout << "│ Max in-degree: " << (max_indegree == -1 ? n_nodes - 1 : max_indegree) << "\n";
+        std::cout << "│ Maximum number of candidate parents per node: "
                   << (max_parents == 0 ? "unrestricted" : std::to_string(max_parents)) << "\n";
-        std::cout << "Structure prior: " << prior_str << "\n";
-        std::cout << "Pruning: " << pruning_str << "\n";
+        std::cout << "│ Structure prior: " << prior_str << "\n";
+        std::cout << "│ Pruning: " << pruning_str << "\n";
         std::cout << std::fixed << std::setprecision(2);
-        std::cout << "Score: BDeu (ESS=" << ess << ")\n";
+        std::cout << "│ Score: BDeu (ESS=" << ess << ")\n";
         std::cout.unsetf(std::ios::floatfield);
-        std::cout << "Number of significant bits in approximations: " << sig_bits << "\n";
-        std::cout << "Amount of RAM available (GiB): " << M_param << "\n";
+        std::cout << "│ Number of significant bits in approximations: " << sig_bits << "\n";
+        std::cout << "│ Amount of RAM available (GiB): " << M_param << "\n";
     }
 
     // --- Printing block ---
-    std::cout << "---------------------------------------------------------------------------------\n";
-    std::cout << "Burn-in iterations: " << burn_in_iter << "\n";
-    std::cout << "Sampling iterations: " << iter << "\n";
-    std::cout << "Fast basic moves per iteration: " << gibby_iter << "\n";
-    std::cout << "REV moves per iteration: " << rev_iter << "\n";
-    std::cout << "MBR moves per iteration: " << mbr_iter << "\n";
-    std::cout << "---------------------------------------------------------------------------------\n";
-    std::cout << "Output files:\n"
-              << "  Sampled DAGs scores -> " << score_output << "\n"
-              << "  Edge probability matrix -> " << posterior_output << "\n";
+    std::cout << "│────────────────────────────────────────────────────────────────────────────────\n";
+    std::cout << "│ Burn-in iterations: " << burn_in_iter << "\n";
+    std::cout << "│ Sampling iterations: " << iter << "\n";
+    std::cout << "│ Fast basic moves per iteration: " << gibby_iter << "\n";
+    std::cout << "│ REV moves per iteration: " << rev_iter << "\n";
+    std::cout << "│ MBR moves per iteration: " << mbr_iter << "\n";
+    std::cout << "│────────────────────────────────────────────────────────────────────────────────\n";
+
+    std::cout << "│ Output files:\n"
+              << "│   Sampled DAGs scores -> " << score_output << "\n"
+              << "│   Edge probability matrix -> " << posterior_output << "\n";
     if (!parent_scores_file.empty())
         std::cout << "  Parent sets scores -> " << parent_scores_file << "\n";
     //std::cout << "---------------------------------------------------------------------------------\n";
+    std::cout << "\n";
     std::cout << "╭────────────────────────────── Sampling phase ──────────────────────────────────╮\n";
     std::cout << "╰────────────────────────────────────────────────────────────────────────────────╯\n";
     // --- Burn-in phase ---
-    std::cout << "Starting burn-in phase..." << std::endl;
+    std::cout << " Starting burn-in phase..." << std::endl;
     for (int it = 0; it < burn_in_iter; it++) {
         ds.sGib(gibby_iter);
         ds.sREV(rev_iter);
         ds.sMBR_alt(mbr_iter, false);
     }
-    std::cout << "Burn-in complete.\n";
+    std::cout << " Burn-in complete.\n";
 
     // --- Sampling phase ---
     std::ofstream outfile(score_output);
     if (!outfile) {
-        std::cerr << "Error: cannot open output file for scores: " << score_output << std::endl;
+        std::cerr << " Error: cannot open output file for scores: " << score_output << std::endl;
         return 1;
     }
 
-    std::cout << "Starting sampling phase..." << std::endl;
+    std::cout << " Starting sampling phase..." << std::endl;
     int progress_interval = 100;
     for (int it = 0; it < iter; it++) {
         ds.sGib(gibby_iter);
@@ -215,14 +217,14 @@ int main(int argc, char* argv[]) {
         add_post(ds, n_nodes, adj);
 
         if ((it + 1) % progress_interval == 0 || it == iter - 1)
-            std::cout << "\rIteration " << (it + 1) << "/" << iter << " complete" << std::flush;
+            std::cout << "\r Iteration " << (it + 1) << "/" << iter << " complete" << std::flush;
     }
 
     std::cout << std::endl;
     outfile.close();
     save_matrix_to_file(adj, iter, posterior_output);
 
-    std::cout << "Sampling complete.\n";
+    std::cout << " Sampling complete.\n";
     //std::cout << "Scores saved to: " << score_output << "\n";
     //std::cout << "Posterior probabilities saved to: " << posterior_output << std::endl;
 
