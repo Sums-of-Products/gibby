@@ -7,8 +7,8 @@
 Gibby efficiently explores the vast space of DAGs using several complementary move types:
 
 - **Gibby Fast Basic Moves (FBM):** Add, remove, or reverse a single edge.  
-- **New Edge Reversal Move (REV):** Efficiently reverses edges while resampling entire parent sets, following [Castelo & Kočka (2009)](https://link.springer.com/article/10.1007/s10994-008-5057-7).  
-- **Markov Blanket Resampling Move (MBR):** Performs large-scale resampling of Markov blankets, as described in [Su & Borsuk (2016)](https://jmlr.org/papers/v17/su16a.html).  
+- **[New Edge Reversal Move (REV)](https://link.springer.com/article/10.1007/s10994-008-5057-7):** Efficiently reverses edges while resampling entire parent sets.
+- **[Markov Blanket Resampling Move (MBR)](https://jmlr.org/papers/v17/su16a.html):** Performs large-scale resampling of Markov blankets.  
 
 A **score-pruning technique** can optionally be enabled to discard low-probability parent sets during local score computation, improving scalability and memory efficiency.
 
