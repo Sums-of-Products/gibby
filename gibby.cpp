@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "Starting sampling phase..." << std::endl;
-    int progress_interval = 1000;
+    int progress_interval = 100;
     for (int it = 0; it < iter; it++) {
         ds.sGib(gibby_iter);
         ds.sREV(rev_iter);
