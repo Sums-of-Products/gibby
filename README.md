@@ -22,7 +22,7 @@ g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
 The only mandatory parameter is the data file (datasets used in the experiments are located in the `data` folder). For example, run the algorithm using:
 
 ```bash
-./gibby  data/asia1k.dat -iter 1000
+./gibby  data/asia1k.dat 
 ```
 Currently, Gibby supports only discrete data, scored using the BDeu system.
 
