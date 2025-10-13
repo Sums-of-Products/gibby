@@ -45,10 +45,12 @@ The mandatory parameters are the data file (the datasets used in the experiments
 | `-REV` | Number of REV moves per main iteration | `200` |
 | `-MBR` | Number of MBR moves per main iteration | `200` |
 
-## Output
+## 📤 Output Files
 
-The algorithm outputs two files containing:  
-- **Sampled DAGs scores**  
-- **Edge-probability matrix** (row = parent, column = child)
+After execution, Gibby produces the following outputs:
 
-It is also possible to output another file containing the computed local scores (if the parameter -O is given).
+- **Scores file** — contains sampled DAG scores over iterations.
+- **Posterior matrix file** — contains the edge probability matrix  
+  (rows = parents, columns = children).
+- **(Optional) Local scores file** — if `-O <filename>` is specified, Gibby also outputs  
+  computed local scores in `.jkl` format.
