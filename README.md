@@ -2,33 +2,31 @@
 
 **Gibby** is a highly optimized **Markov Chain Monte Carlo (MCMC)** algorithm for sampling **directed acyclic graphs (DAGs)** from their **posterior distribution**.  
 
-## 🧩 Algorithm Overview
+## Algorithm Overview
 
 Gibby efficiently explores the vast space of DAGs using several complementary move types:
 
 - **Fast Basic Moves (FBM):** Add, remove, or reverse a single edge.  
-- **New Edge Reversal (REV):** Efficient edge reversal based on  
-  [Castelo & Kočka (2009)](https://link.springer.com/article/10.1007/s10994-008-5057-7).  
-- **Markov Blanket Resampling (MBR):** Large-scale structural resampling of Markov blankets,  
-  following [Su & Borsuk (2016)](https://jmlr.org/papers/v17/su16a.html).  
+- **New Edge Reversal (REV):** Efficiently reverses edges while resampling entire parent sets, following [Castelo & Kočka (2009)](https://link.springer.com/article/10.1007/s10994-008-5057-7).  
+- **Markov Blanket Resampling (MBR):** Performs large-scale resampling of Markov blankets, as described in [Su & Borsuk (2016)](https://jmlr.org/papers/v17/su16a.html).  
 
 A **score-pruning technique** can optionally be enabled to discard low-probability parent sets during local score computation, improving scalability and memory efficiency.
 
-## ⚙️ Compilation and Execution
+## Compilation and Execution
 
 Gibby is implemented in **C++17** and can be compiled with **g++** as follows:
 
 ```bash
 g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
 ```
-The mandatory parameters are the data file (datasets used in the experiments are located in the `data` folder) and the number of main MCMC iterations. For example, to run the algorithm using
+The mandatory parameters are the data file (datasets used in the experiments are located in the `data` folder) and the number of main MCMC iterations. For example, run the algorithm using
 
 ```bash
 ./gibby  data/asia1k.dat -iter 1000
 ```
-Currently, only discrete data can be processed using the BDeu scoring system.
+Currently, Gibby supports only discrete data, scored using the BDeu system.
 
-## 🔧 Optional Parameters
+## Optional Parameters
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
@@ -46,7 +44,7 @@ Currently, only discrete data can be processed using the BDeu scoring system.
 | `-REV` | Number of REV moves per main iteration | `200` |
 | `-MBR` | Number of MBR moves per main iteration | `200` |
 
-## 📤 Output Files
+## Output Files
 
 After execution, Gibby produces the following outputs:
 
