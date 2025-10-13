@@ -19,7 +19,7 @@ Gibby is implemented in **C++** and can be compiled with **g++** as follows:
 ```bash
 g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
 ```
-The mandatory parameters are the data file (datasets used in the experiments are located in the `data` folder) and the number of main MCMC iterations. For example, run the algorithm using:
+The only mandatory parameter is the data file (datasets used in the experiments are located in the `data` folder). For example, run the algorithm using:
 
 ```bash
 ./gibby  data/asia1k.dat -iter 1000
@@ -39,8 +39,9 @@ Currently, Gibby supports only discrete data, scored using the BDeu system.
 | `-R` | Seed for random number generator | random |
 | `-O` | Output file name for local scores (in `.jkl` format) | none |
 | `-M` | Amount of RAM available (in GiB) | `16` |
+| `-iter` | Number of main iterations | `10 000` |
 | `-burnin` | Number of burn-in iterations | `iter / 10` |
-| `-FBM` | Number of Fast Basic Move steps per main iteration | `10000` |
+| `-FBM` | Number of Fast Basic Move steps per main iteration | `10 000` |
 | `-REV` | Number of REV moves per main iteration | `200` |
 | `-MBR` | Number of MBR moves per main iteration | `200` |
 
