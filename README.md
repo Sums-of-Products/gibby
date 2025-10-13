@@ -21,12 +21,13 @@ Gibby is implemented in **C++17** and can be compiled with **g++** as follows:
 ```bash
 g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
 ```
-
-The mandatory parameters are the data file (the datasets used in the experiments are  in the data folder) and the number of main iterations of the MCMC algorithm. For example, run
+The mandatory parameters are the data file (datasets used in the experiments are located in the `data` folder) and the number of main MCMC iterations. For example, to run the algorithm using
 
 ```bash
 ./gibby  data/asia1k.dat -iter 1000
 ```
+Currently, only discrete data can be processed using the BDeu scoring system.
+
 ## 🔧 Optional Parameters
 
 | Parameter | Description | Default |
@@ -50,7 +51,5 @@ The mandatory parameters are the data file (the datasets used in the experiments
 After execution, Gibby produces the following outputs:
 
 - **Scores file** — contains sampled DAG scores over iterations.
-- **Posterior matrix file** — contains the edge probability matrix  
-  (rows = parents, columns = children).
-- **(Optional) Local scores file** — if `-O <filename>` is specified, Gibby also outputs  
-  computed local scores in `.jkl` format.
+- **Posterior matrix file** — contains the edge probability matrix  (rows = parents, columns = children).
+- **(Optional) Local scores file** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
