@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
 
     // --- Default parameters ---
     int iter = -1; // mandatory in shortcut mode
-    int burn_in_iter = 1000;
+    int burn_in_iter = -1; // default will be set to iter / 10
     int gibby_iter = 10000;
     int rev_iter = 200;
     int mbr_iter = 200;
@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
     int structure_prior = 1;
     int pruning = 2; // bottom-up default
     int s_flag = 1;
-    int M_param = 16; // <-- default 16 GiB
+    int M_param = 16; // Amount of RAM (GiB) default
 
     std::string parent_scores_file = "";
     int seed_value = 0;
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
             else if (arg == "-REV" && i + 1 < argc) rev_iter = std::atoi(argv[++i]);
             else if (arg == "-MBR" && i + 1 < argc) mbr_iter = std::atoi(argv[++i]);
             else if (arg == "-a" && i + 1 < argc) sig_bits = std::atoi(argv[++i]);
-            else if (arg == "-M" && i + 1 < argc) M_param = std::atoi(argv[++i]); // added
+            else if (arg == "-M" && i + 1 < argc) M_param = std::atoi(argv[++i]);
             else if (arg[0] == '-') i++; // ignore unknown flags
         }
 
@@ -79,13 +79,17 @@ int main(int argc, char* argv[]) {
             else if (arg == "-a" && i + 1 < argc) sig_bits = std::atoi(argv[++i]);
             else if (arg == "-d" && i + 1 < argc) max_indegree = std::atoi(argv[++i]);
             else if (arg == "-K" && i + 1 < argc) max_parents = std::atoi(argv[++i]);
-            else if (arg == "-M" && i + 1 < argc) M_param = std::atoi(argv[++i]); // added
+            else if (arg == "-M" && i + 1 < argc) M_param = std::atoi(argv[++i]);
             else if (arg == "-p" && i + 1 < argc) structure_prior = std::atoi(argv[++i]);
             else if (arg == "-P" && i + 1 < argc) pruning = std::atoi(argv[++i]);
             else if (arg == "-R" && i + 1 < argc) seed_value = std::atoi(argv[++i]);
         }
         if (iter <= 0) iter = 10000;
-        if (burn_in_iter <= 0) burn_in_iter = std::max(1, iter / 10);
+    }
+
+    // --- Set burn-in iterations if not specified ---
+    if (burn_in_iter <= 0) {
+        burn_in_iter = std::max(1, iter / 10);
     }
 
     // --- Random seed ---
@@ -145,9 +149,9 @@ int main(int argc, char* argv[]) {
                                   (pruning == 1) ? "top-down" :
                                   (pruning == 2) ? "bottom-up" : "unknown";
 
-        std::cout << "========================================\n";
-        std::cout << "        Gibby DAGs sampler  \n";
-        std::cout << "========================================\n";
+        std::cout << "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n";
+        std::cout << "┃                               Gibby DAGs Sampler                              ┃\n";
+        std::cout << "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n";
         std::cout << "Dataset: " << datafile << "\n";
         std::cout << "Random seed (R): " << seed_value << "\n";
         std::cout << "Max in-degree: " << (max_indegree == -1 ? n_nodes - 1 : max_indegree) << "\n";
@@ -163,20 +167,21 @@ int main(int argc, char* argv[]) {
     }
 
     // --- Printing block ---
-    std::cout << "----------------------------------------\n";
+    std::cout << "---------------------------------------------------------------------------------\n";
     std::cout << "Burn-in iterations: " << burn_in_iter << "\n";
     std::cout << "Sampling iterations: " << iter << "\n";
-    std::cout << "Fast basic moves steps per iteration: " << gibby_iter << "\n";
-    std::cout << "REV steps per iteration: " << rev_iter << "\n";
-    std::cout << "MBR steps per iteration: " << mbr_iter << "\n";
-    std::cout << "----------------------------------------\n";
+    std::cout << "Fast basic moves per iteration: " << gibby_iter << "\n";
+    std::cout << "REV moves per iteration: " << rev_iter << "\n";
+    std::cout << "MBR moves per iteration: " << mbr_iter << "\n";
+    std::cout << "---------------------------------------------------------------------------------\n";
     std::cout << "Output files:\n"
               << "  Sampled DAGs scores -> " << score_output << "\n"
               << "  Edge probability matrix -> " << posterior_output << "\n";
     if (!parent_scores_file.empty())
         std::cout << "  Parent sets scores -> " << parent_scores_file << "\n";
-    std::cout << "----------------------------------------\n";
-
+    //std::cout << "---------------------------------------------------------------------------------\n";
+    std::cout << "╭────────────────────────────── Sampling phase ──────────────────────────────────╮\n";
+    std::cout << "╰────────────────────────────────────────────────────────────────────────────────╯\n";
     // --- Burn-in phase ---
     std::cout << "Starting burn-in phase..." << std::endl;
     for (int it = 0; it < burn_in_iter; it++) {
@@ -218,8 +223,8 @@ int main(int argc, char* argv[]) {
     save_matrix_to_file(adj, iter, posterior_output);
 
     std::cout << "Sampling complete.\n";
-    std::cout << "Scores saved to: " << score_output << "\n";
-    std::cout << "Posterior probabilities saved to: " << posterior_output << std::endl;
+    //std::cout << "Scores saved to: " << score_output << "\n";
+    //std::cout << "Posterior probabilities saved to: " << posterior_output << std::endl;
 
     return 0;
 }
