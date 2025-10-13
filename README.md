@@ -41,9 +41,9 @@ Currently, Gibby supports only discrete data, scored using the BDeu system.
 | `-M` | Amount of RAM available (in GiB) | `16` |
 | `-iter` | Number of main iterations | `10 000` |
 | `-burnin` | Number of burn-in iterations | `iter / 10` |
-| `-FBM` | Number of Fast Basic Move steps per main iteration | `10 000` |
-| `-REV` | Number of REV moves per main iteration | `200` |
-| `-MBR` | Number of MBR moves per main iteration | `200` |
+| `-FBM` | Number of FBM steps per iteration | `10 000` |
+| `-REV` | Number of REV moves per iteration | `200` |
+| `-MBR` | Number of MBR moves per iteration | `200` |
 
 ## Output Files
 
