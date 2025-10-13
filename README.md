@@ -6,15 +6,15 @@
 
 Gibby efficiently explores the vast space of DAGs using several complementary move types:
 
-- **Fast Basic Moves (FBM):** Add, remove, or reverse a single edge.  
-- **New Edge Reversal (REV):** Efficiently reverses edges while resampling entire parent sets, following [Castelo & Kočka (2009)](https://link.springer.com/article/10.1007/s10994-008-5057-7).  
-- **Markov Blanket Resampling (MBR):** Performs large-scale resampling of Markov blankets, as described in [Su & Borsuk (2016)](https://jmlr.org/papers/v17/su16a.html).  
+- **Gibby Fast Basic Moves (FBM):** Add, remove, or reverse a single edge.  
+- **New Edge Reversal Move (REV):** Efficiently reverses edges while resampling entire parent sets, following [Castelo & Kočka (2009)](https://link.springer.com/article/10.1007/s10994-008-5057-7).  
+- **Markov Blanket Resampling Move (MBR):** Performs large-scale resampling of Markov blankets, as described in [Su & Borsuk (2016)](https://jmlr.org/papers/v17/su16a.html).  
 
 A **score-pruning technique** can optionally be enabled to discard low-probability parent sets during local score computation, improving scalability and memory efficiency.
 
 ## Compilation and Execution
 
-Gibby is implemented in **C++17** and can be compiled with **g++** as follows:
+Gibby is implemented in **C++** and can be compiled with **g++** as follows:
 
 ```bash
 g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
@@ -48,6 +48,6 @@ Currently, Gibby supports only discrete data, scored using the BDeu system.
 
 After execution, Gibby produces the following outputs:
 
-- **Scores file** — contains sampled DAG scores over iterations.
-- **Posterior matrix file** — contains the edge probability matrix  (rows = parents, columns = children).
-- **(Optional) Local scores file** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
+- **Sampled DAGs scores** — contains the sampled DAGs scores over iterations.
+- **Edge probability matrix** — contains the posterior probability of the edges  (row = parent, column = child).
+- **(Optional) Parent sets scores** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
