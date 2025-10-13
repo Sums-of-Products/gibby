@@ -148,13 +148,16 @@ int main(int argc, char* argv[]) {
         std::string pruning_str = (pruning == 0) ? "no pruning" :
                                   (pruning == 1) ? "top-down" :
                                   (pruning == 2) ? "bottom-up" : "unknown";
-
-        std::cout << "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n";
-        std::cout << "┃                               Gibby DAGs Sampler                              ┃\n";
-        std::cout << "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n";
+        std::cout << " \n";
+        std::cout << " \n";
+        std::cout << " \n";
+        std::cout << "█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█\n";
+        std::cout << "█                              Gibby DAGs Sampler                               █\n";
+        std::cout << "█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█\n";
+        std::cout << " \n";
+        std::cout << "╭───────────────────────────── Scoring parameters ───────────────────────────────\n";
         std::cout << "│ \n";
         std::cout << "│ Dataset: " << datafile << "\n";
-        std::cout << "│ Random seed (R): " << seed_value << "\n";
         std::cout << "│ Max in-degree: " << (max_indegree == -1 ? n_nodes - 1 : max_indegree) << "\n";
         std::cout << "│ Maximum number of candidate parents per node: "
                   << (max_parents == 0 ? "unrestricted" : std::to_string(max_parents)) << "\n";
@@ -167,28 +170,26 @@ int main(int argc, char* argv[]) {
         std::cout << "│ Amount of RAM available (GiB): " << M_param << "\n";
         std::cout << "│ \n";
     }
-
     // --- Printing block ---
-    std::cout << "│────────────────────────────────────────────────────────────────────────────────\n";
+    std::cout << "╭────────────────────────────── MCMC parameters ─────────────────────────────────\n";
     std::cout << "│ \n";
     std::cout << "│ Burn-in iterations: " << burn_in_iter << "\n";
     std::cout << "│ Main iterations: " << iter << "\n";
     std::cout << "│ Fast basic moves per iteration: " << gibby_iter << "\n";
     std::cout << "│ REV moves per iteration: " << rev_iter << "\n";
     std::cout << "│ MBR moves per iteration: " << mbr_iter << "\n";
+    std::cout << "│ Random seed (R): " << seed_value << "\n";
     std::cout << "│ \n";
-    std::cout << "│────────────────────────────────────────────────────────────────────────────────\n";
+    std::cout << "╭─────────────────────────────── Output files ───────────────────────────────────\n";
     std::cout << "│ \n";
-    std::cout << "│ Output files:\n"
-              << "│   Sampled DAGs scores -> " << score_output << "\n"
-              << "│   Edge probability matrix -> " << posterior_output << "\n";
+    std::cout << "│ Sampled DAGs scores -> " << score_output << "\n";
+    std::cout << "│ Edge probability matrix -> " << posterior_output << "\n";
     if (!parent_scores_file.empty())
-        std::cout << "│   Parent sets scores -> " << parent_scores_file << "\n";
+        std::cout << "│ Parent sets scores -> " << parent_scores_file << "\n";
     std::cout << "│ \n";
     //std::cout << "---------------------------------------------------------------------------------\n";
     std::cout << "\n";
-    std::cout << "╭────────────────────────────── Sampling phase ──────────────────────────────────╮\n";
-    std::cout << "╰────────────────────────────────────────────────────────────────────────────────╯\n";
+    std::cout << "♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ Sampling phase ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦\n";
     std::cout << "\n";
     // --- Burn-in phase ---
     std::cout << " Starting burn-in phase..." << std::endl;
