@@ -2,8 +2,6 @@
 
 **Gibby** is a highly optimized **Markov Chain Monte Carlo (MCMC)** algorithm for sampling **directed acyclic graphs (DAGs)** from their **posterior distribution**.  
 
----
-
 ## 🧩 Algorithm Overview
 
 Gibby efficiently explores the vast space of DAGs using several complementary move types:
@@ -15,8 +13,6 @@ Gibby efficiently explores the vast space of DAGs using several complementary mo
   following [Su & Borsuk (2016)](https://jmlr.org/papers/v17/su16a.html).  
 
 A **score-pruning technique** can optionally be enabled to discard low-probability parent sets during local score computation, improving scalability and memory efficiency.
-
----
 
 ## ⚙️ Compilation and Execution
 
