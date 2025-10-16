@@ -33,7 +33,7 @@ Currently, Gibby supports only discrete data, scored using the BDeu system.
 | `-d` | Maximum in-degree per node | `-1` (unrestricted) |
 | `-e` | Equivalent sample size (ESS) parameter for BDeu score | `1.0` |
 | `-p` | Structure prior: `0` uniform, `1` fair, `2` fair+, `-w` edge(w) | `1` |
-| `-K` | Maximum number of candidate parents per node | `0` (unrestricted) |
+| `-K` | Number of candidate parents per node | `0` (unrestricted) |
 | `-P` | Score pruning mode: `0` none, `1` top-down, `2` bottom-up; if preceded by digit `k>0`, only up to `min{k, maxind}` parents | `0` |
 | `-a` | Number of significant bits in approximations | `15` |
 | `-R` | Seed for random number generator | random |
