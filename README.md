@@ -4,7 +4,7 @@
 
 ## Algorithm Overview
 
-Gibby efficiently explores the vast space of DAGs using several complementary move types:
+Gibby efficiently explores the vast space of DAGs using several move types:
 
 - **Gibby Fast Basic Moves (FBM):** Add, remove, or reverse a single edge.  
 - **[New Edge Reversal Move](https://link.springer.com/article/10.1007/s10994-008-5057-7) (REV):** Efficiently reverses edges while resampling entire parent sets.
