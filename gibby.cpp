@@ -158,8 +158,8 @@ int main(int argc, char* argv[]) {
         std::cout << "╭───────────────────────────── Scoring parameters ───────────────────────────────\n";
         std::cout << "│ \n";
         std::cout << "│ Dataset: " << datafile << "\n";
-        std::cout << "│ Max in-degree: " << (max_indegree == -1 ? n_nodes - 1 : max_indegree) << "\n";
-        std::cout << "│ Maximum number of candidate parents per node: "
+        std::cout << "│ Maximum in-degree: " << (max_indegree == -1 ? n_nodes - 1 : max_indegree) << "\n";
+        std::cout << "│ Number of candidate parents per node: "
                   << (max_parents == 0 ? "unrestricted" : std::to_string(max_parents)) << "\n";
         std::cout << "│ Structure prior: " << prior_str << "\n";
         std::cout << "│ Pruning: " << pruning_str << "\n";
