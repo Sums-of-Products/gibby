@@ -24,9 +24,9 @@ The only mandatory parameter is the data file (the datasets used in the experime
 ```bash
 ./gibby  data/asia1k.dat 
 ```
-Currently, Gibby supports only discrete data, scored using the BDeu system.
+Currently, Gibby can generate scores only from discrete data, scored using the BDeu system. 
 
-## Optional Parameters
+### Optional Parameters
 
 | Parameter | Description | Default |
 |-----------|-------------|---------|
@@ -44,6 +44,14 @@ Currently, Gibby supports only discrete data, scored using the BDeu system.
 | `-FBM` | Number of Fast Basic Moves  per iteration | `10 000` |
 | `-REV` | Number of REV moves per iteration | `200` |
 | `-MBR` | Number of MBR moves per iteration | `200` |
+
+### Run using precomputed local scores
+
+For continuous or mixed networks, you can use precomputed local scores instead of raw data. These scores should be provided in the .jkl format. To run gibby with a .jkl score file, use:
+
+```bash
+./gibby  -I score_file_path.jkl
+```
 
 ## Output Files
 
