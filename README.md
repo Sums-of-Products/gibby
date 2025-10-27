@@ -47,7 +47,7 @@ Currently, Gibby can generate scores only from discrete data, scored using the B
 
 ### Run using precomputed local scores
 
-For continuous or mixed networks, you can use precomputed local scores instead of raw data. These scores should be provided in the .jkl format. To run gibby with a .jkl score file, use:
+For continuous or mixed networks, you can use precomputed local scores instead of raw data. These scores should be provided in the .jkl format. In this case, run:
 
 ```bash
 ./gibby  -I score_file_path.jkl
