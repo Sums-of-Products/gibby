@@ -19,9 +19,9 @@ int main(int argc, char* argv[]) {
     bool shortcut_mode = false;
     std::string datafile;
 
-    // --- Default parameters ---
-    int iter = -1; // mandatory in shortcut mode
-    int burn_in_iter = -1; // default will be set to iter / 10
+
+    int iter = -1; 
+    int burn_in_iter = -1; 
     int gibby_iter = 10000;
     int rev_iter = 200;
     int mbr_iter = 200;
@@ -31,18 +31,17 @@ int main(int argc, char* argv[]) {
     int max_indegree = -1;
     int max_parents = 0;
     int structure_prior = 1;
-    int pruning = 2; // bottom-up default
+    int pruning = 2; 
     int s_flag = 1;
-    int M_param = 16; // Amount of RAM (GiB) default
+    int M_param = 16; 
 
     std::string parent_scores_file = "";
     int seed_value = 0;
 
-    // --- Detect if shortcut mode ---
     if (std::string(argv[1]) == "-I") {
         shortcut_mode = true;
-        if (argc < 4) {
-            std::cerr << "Error: -I requires a file and -iter <number>\n";
+        if (argc < 3) {
+            std::cerr << "Error: -I requires a file\n";
             return 1;
         }
         datafile = argv[2];
@@ -56,15 +55,14 @@ int main(int argc, char* argv[]) {
             else if (arg == "-MBR" && i + 1 < argc) mbr_iter = std::atoi(argv[++i]);
             else if (arg == "-a" && i + 1 < argc) sig_bits = std::atoi(argv[++i]);
             else if (arg == "-M" && i + 1 < argc) M_param = std::atoi(argv[++i]);
-            else if (arg[0] == '-') i++; // ignore unknown flags
+            else if (arg == "-d" && i + 1 < argc) max_indegree = std::atoi(argv[++i]); 
+            else if (arg[0] == '-') i++; 
         }
 
-        if (iter <= 0) {
-            std::cerr << "Error: -iter is mandatory in shortcut mode.\n";
-            return 1;
-        }
+        if (iter <= 0) iter = 10000;  // default
+
     } else {
-        // --- Normal mode ---
+
         datafile = argv[1];
         for (int i = 2; i < argc; i++) {
             std::string arg = argv[i];
@@ -87,17 +85,16 @@ int main(int argc, char* argv[]) {
         if (iter <= 0) iter = 10000;
     }
 
-    // --- Set burn-in iterations if not specified ---
     if (burn_in_iter <= 0) {
         burn_in_iter = std::max(1, iter / 10);
     }
 
-    // --- Random seed ---
+
     if (seed_value == 0)
         seed_value = static_cast<int>(
             std::chrono::system_clock::now().time_since_epoch().count() % 1000000);
 
-    // --- Prepare user_params for DAGsampler ---
+
     std::string user_params;
     if (shortcut_mode) {
         user_params = "-I " + datafile + " ";
@@ -115,7 +112,7 @@ int main(int argc, char* argv[]) {
             user_params += "-O " + parent_scores_file + " ";
     }
 
-    // --- Output directory ---
+
     std::filesystem::create_directories("results");
 
     DAGsampler ds;
@@ -132,14 +129,26 @@ int main(int argc, char* argv[]) {
     std::string score_output = "results/" + base_name + "_R" + std::to_string(seed_value) + "_scores.txt";
     std::string posterior_output = "results/" + base_name + "_R" + std::to_string(seed_value) + "_posterior.txt";
 
-    // --- Summary output ---
+
     if (shortcut_mode) {
-        std::cout << "========================================\n";
-        std::cout << "        Gibby DAGs sampler  \n";
-        std::cout << "========================================\n";
-        std::cout << "Parent sets scores: " << datafile << "\n";
-        std::cout << "Number of significant bits in approximations: " << sig_bits << "\n";
-        std::cout << "Amount of RAM available (GiB): " << M_param << "\n";
+        std::cout << " \n";
+        std::cout << " \n";
+        std::cout << " \n";
+        std::cout << "█▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█\n";
+        std::cout << "█                              Gibby DAGs Sampler                               █\n";
+        std::cout << "█▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█\n";
+        std::cout << " \n";
+        std::cout << "╭───────────────────────────── Scoring parameters ───────────────────────────────\n";
+        std::cout << "│ \n";
+        std::cout << "│ Score file: " << datafile << "\n";
+        if (max_indegree > 0) {
+        std::cout << "│ Maximum in-degree: " << max_indegree << "\n";
+        }
+        std::cout << "│ Number of candidate parents per node: "
+                  << (max_parents == 0 ? "unrestricted" : std::to_string(max_parents)) << "\n";
+        std::cout << "│ Number of significant bits in approximations: " << sig_bits << "\n";
+        std::cout << "│ Amount of RAM available (GiB): " << M_param << "\n";
+        std::cout << "│ \n";
     } else {
         std::string prior_str = (structure_prior == 0) ? "uniform" :
                                 (structure_prior == 1) ? "fair" :
@@ -170,7 +179,7 @@ int main(int argc, char* argv[]) {
         std::cout << "│ Amount of RAM available (GiB): " << M_param << "\n";
         std::cout << "│ \n";
     }
-    // --- Printing block ---
+
     std::cout << "╭────────────────────────────── MCMC parameters ─────────────────────────────────\n";
     std::cout << "│ \n";
     std::cout << "│ Burn-in iterations: " << burn_in_iter << "\n";
@@ -191,7 +200,7 @@ int main(int argc, char* argv[]) {
     std::cout << "\n";
     std::cout << "♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ Sampling phase ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦ ♦\n";
     std::cout << "\n";
-    // --- Burn-in phase ---
+
     std::cout << " Starting burn-in phase..." << std::endl;
     int progress_interval1 = 100;
     for (int it = 0; it < burn_in_iter; it++) {
@@ -205,7 +214,7 @@ int main(int argc, char* argv[]) {
     std::cout << std::endl;
     std::cout << std::endl;
 
-    // --- Sampling phase ---
+
     std::ofstream outfile(score_output);
     if (!outfile) {
         std::cerr << " Error: cannot open output file for scores: " << score_output << std::endl;
@@ -238,8 +247,6 @@ int main(int argc, char* argv[]) {
 
     std::cout << " Sampling complete.\n";
     std::cout << "\n";
-    //std::cout << "Scores saved to: " << score_output << "\n";
-    //std::cout << "Posterior probabilities saved to: " << posterior_output << std::endl;
 
     return 0;
 }
