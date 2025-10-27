@@ -141,12 +141,12 @@ int main(int argc, char* argv[]) {
         std::cout << "╭───────────────────────────── Scoring parameters ───────────────────────────────\n";
         std::cout << "│ \n";
         std::cout << "│ Score file: " << datafile << "\n";
-        if (max_indegree > 0) {
-        std::cout << "│ Maximum in-degree: " << max_indegree << "\n";
-        }
-        std::cout << "│ Number of candidate parents per node: "
-                  << (max_parents == 0 ? "unrestricted" : std::to_string(max_parents)) << "\n";
-        std::cout << "│ Number of significant bits in approximations: " << sig_bits << "\n";
+        // if (max_indegree > 0) {
+        // std::cout << "│ Maximum in-degree: " << max_indegree << "\n";
+        // }
+        // std::cout << "│ Number of candidate parents per node: "
+        //           << (max_parents == 0 ? "unrestricted" : std::to_string(max_parents)) << "\n";
+        // std::cout << "│ Number of significant bits in approximations: " << sig_bits << "\n";
         std::cout << "│ Amount of RAM available (GiB): " << M_param << "\n";
         std::cout << "│ \n";
     } else {
