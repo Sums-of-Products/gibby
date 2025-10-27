@@ -45,7 +45,7 @@ Currently, Gibby can generate scores only from discrete data, scored using the B
 | `-REV` | Number of REV moves per iteration | `200` |
 | `-MBR` | Number of MBR moves per iteration | `200` |
 
-### Using Precomputed Local Scores
+### Run using precomputed local scores
 
 For continuous or mixed networks, you can use precomputed local scores instead of raw data. These scores should be provided in the .jkl format. To run gibby with a .jkl score file, use:
 
