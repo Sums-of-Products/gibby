@@ -1,6 +1,6 @@
 # **Gibby**
 
-**Gibby** is a highly optimized **Markov Chain Monte Carlo (MCMC)** algorithm for sampling **directed acyclic graphs (DAGs)** from their **posterior distribution**.  
+This repository provides an implementation of **Gibby**, a highly optimized **Markov chain Monte Carlo (MCMC)** algorithm for sampling **directed acyclic graphs (DAGs)** from their posterior distribution, as described in the paper **[Scaling Up Bayesian DAG Sampling ](https://arxiv.org/abs/2510.25254)**. 
 
 ## Algorithm Overview
 
