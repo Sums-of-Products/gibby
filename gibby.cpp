@@ -102,6 +102,8 @@ int main(int argc, char* argv[]) {
         user_params += "-M " + std::to_string(M_param) + " ";
     } else {
         user_params = "-s " + std::to_string(s_flag) + " ";
+        user_params += "-d " + std::to_string(max_indegree) + " ";
+        user_params += "-p " + std::to_string(structure_prior) + " ";
         user_params += "-e " + std::to_string(ess) + " ";
         user_params += "-a " + std::to_string(sig_bits) + " ";
         user_params += "-P " + std::to_string(pruning) + " ";
