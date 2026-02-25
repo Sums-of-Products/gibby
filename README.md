@@ -38,14 +38,14 @@ Currently, Gibby can generate scores only from discrete data, scored using the B
 | `-P` | Score pruning mode: `0` none, `1` top-down, `2` bottom-up; if preceded by digit `k>0`, only up to `min{k, maxind}` parents | `0` |
 | `-a` | Number of significant bits in approximations | `15` |
 | `-R` | Seed for random number generator | random |
-| `-O` | Output file name for local scores (in `.jkl` format) | none |
+| `-O` | Name of the generated output file name for local scores (in `.jkl` format) | none |
 | `-M` | Amount of RAM available (in GiB) | `16` |
 | `-iter` | Number of main iterations | `10 000` |
 | `-burnin` | Number of burn-in iterations | `iter / 10` |
 | `-FBM` | Number of Fast Basic Moves  per iteration | `10 000` |
 | `-REV` | Number of REV moves per iteration | `200` |
 | `-MBR` | Number of MBR moves per iteration | `100` |
-| `-iPPe` | Generates a new file where the posterior probability of the edges is shown after every iPPE iterations | none |
+| `-iPPe` | Generates a file showing edge posterior probabilities every iPPE <n>  iterations | none |
 
 
 ## Output Files
@@ -55,3 +55,4 @@ After execution, Gibby produces the following outputs:
 - **Sampled DAGs scores** — contains the sampled DAGs scores over iterations.
 - **Edge probability matrix** — contains the posterior probability of the edges  (row = parent, column = child).
 - **(Optional) Parent sets scores** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
+- **(Optional) Edge posterior probabilities per iPPE** — if -iPPE <n> is specified, Gibby generates a file showing edge posterior probabilities every n iterations.
