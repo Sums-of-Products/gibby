@@ -19,12 +19,13 @@ Gibby is implemented in **C++** and can be compiled with **g++** as follows:
 ```bash
 g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
 ```
-The only mandatory parameter is the data file (the datasets used in the experiments are located in the `data` folder). For example, run the algorithm using:
+The only mandatory parameter is the data file or the local scores file in .jkl format (.jkl extension is needed for a correct detection of the score file). The datasets and the score file used in the experiments are located in the `data` folder). For example, run:
 
 ```bash
 ./gibby  data/asia1k.dat 
 ```
-Currently, Gibby can generate scores only from discrete data, scored using the BDeu system. 
+
+Currently, Gibby can generate scores only from discrete data, scored using the BDeu system. We recommend using [GOBNILP]([https://link.springer.com/article/10.1007/s10994-008-5057-7](https://benchpressdocs.readthedocs.io/en/latest/structure_learning_algorithms/gobnilp.html)) to generate local score files for continuous data. 
 
 ### Optional Parameters
 
@@ -43,15 +44,9 @@ Currently, Gibby can generate scores only from discrete data, scored using the B
 | `-burnin` | Number of burn-in iterations | `iter / 10` |
 | `-FBM` | Number of Fast Basic Moves  per iteration | `10 000` |
 | `-REV` | Number of REV moves per iteration | `200` |
-| `-MBR` | Number of MBR moves per iteration | `200` |
+| `-MBR` | Number of MBR moves per iteration | `100` |
+| `-iPPe` | Generates a new file where the posterior probability of the edges is shown after every iPPE iterations | none |
 
-### Run using precomputed local scores
-
-For continuous or mixed networks, you can use precomputed local scores instead of raw data. These scores should be provided using the .jkl format. In this case, run the algorithm using:
-
-```bash
-./gibby  -I score_file_path.jkl
-```
 
 ## Output Files
 
