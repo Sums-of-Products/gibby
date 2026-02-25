@@ -22,7 +22,7 @@ g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
 The only mandatory parameter is the data file or the local scores file in `.jkl` format (`.jkl` extension is needed for a correct detection of the score file). The datasets and the score file used in the experiments are located in the `data` folder). For example, run:
 
 ```bash
-./gibby  data/asia1k.dat 
+./gibby  ./data/asia1k.dat 
 ```
 
 Currently, Gibby can generate scores only from discrete data, scored using the BDeu system. We recommend using [GOBNILP](https://benchpressdocs.readthedocs.io/en/latest/structure_learning_algorithms/gobnilp.html) to generate local score files for continuous data. 
