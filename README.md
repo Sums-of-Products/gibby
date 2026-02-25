@@ -27,6 +27,8 @@ The only mandatory parameter is the data file or the local scores file in `.jkl`
 
 Currently, Gibby can generate scores only from discrete data, scored using the BDeu system. We recommend using [GOBNILP](https://benchpressdocs.readthedocs.io/en/latest/structure_learning_algorithms/gobnilp.html) to generate local score files for continuous data. 
 
+It is possible to prune an existing local score file using `-P` and set a maximum in-degree per node `-d`. Set -O <filename>` to generate the new score file, and `iter=0` to skip the sampling phase. 
+
 ### Optional Parameters
 
 | Parameter | Description | Default |
