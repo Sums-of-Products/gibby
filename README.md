@@ -19,7 +19,7 @@ Gibby is implemented in **C++** and can be compiled with **g++** as follows:
 ```bash
 g++ -std=c++17 -march=native -O3 -o gibby gibby.cpp
 ```
-The only mandatory parameter is the data file or the local scores file in .jkl format (.jkl extension is needed for a correct detection of the score file). The datasets and the score file used in the experiments are located in the `data` folder). For example, run:
+The only mandatory parameter is the data file or the local scores file in `.jkl` format (`.jkl` extension is needed for a correct detection of the score file). The datasets and the score file used in the experiments are located in the `data` folder). For example, run:
 
 ```bash
 ./gibby  data/asia1k.dat 
@@ -54,5 +54,5 @@ After execution, Gibby produces the following outputs:
 
 - **Sampled DAGs scores** — contains the sampled DAGs scores over iterations.
 - **Edge probability matrix** — contains the posterior probability of the edges  (row = parent, column = child).
-- **(Optional) Parent sets scores** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
 - **(Optional) Edge posterior probabilities per iPPE** — if -iPPE `<n>` is specified, Gibby generates a file showing edge posterior probabilities every n iterations.
+- **(Optional) Parent sets scores** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
