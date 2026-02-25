@@ -108,28 +108,6 @@ int main(int argc, char* argv[]) {
     if (seed_value == 0) {
         seed_value = static_cast<int>(
             std::chrono::system_clock::now().time_since_epoch().count() % 1000000);
-<<<<<<< HEAD
-=======
-
-
-    std::string user_params;
-    if (shortcut_mode) {
-        user_params = "-I " + datafile + " ";
-        user_params += "-a " + std::to_string(sig_bits) + " ";
-        user_params += "-M " + std::to_string(M_param) + " ";
-    } else {
-        user_params = "-s " + std::to_string(s_flag) + " ";
-        user_params += "-d " + std::to_string(max_indegree) + " ";
-        user_params += "-p " + std::to_string(structure_prior) + " ";
-        user_params += "-e " + std::to_string(ess) + " ";
-        user_params += "-a " + std::to_string(sig_bits) + " ";
-        user_params += "-P " + std::to_string(pruning) + " ";
-        user_params += "-K " + std::to_string(max_parents) + " ";
-        user_params += "-M " + std::to_string(M_param) + " ";
-        user_params += "-R " + std::to_string(seed_value) + " ";
-        if (!parent_scores_file.empty())
-            user_params += "-O " + parent_scores_file + " ";
->>>>>>> 7233a4b8f14eb35c2b9aae11b326a371ecbf49e5
     }
 
     std::string user_params;
