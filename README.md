@@ -45,7 +45,7 @@ Currently, Gibby can generate scores only from discrete data, scored using the B
 | `-FBM` | Number of Fast Basic Moves  per iteration | `10 000` |
 | `-REV` | Number of REV moves per iteration | `200` |
 | `-MBR` | Number of MBR moves per iteration | `100` |
-| `-iPPe` | Generates a file showing edge posterior probabilities every iPPE `<n>` iterations | none |
+| `-iPPE` | Generates a file showing edge posterior probabilities every iPPE `<n>` iterations | none |
 
 
 ## Output Files
