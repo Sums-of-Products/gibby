@@ -1,3 +1,5 @@
+// 5 Feb 2026, Koivisto et al. 
+
 // Compile with g++ -Wall -O3 -ffast-math
 // If used within a tight loop, also try out -funroll-loops
 #ifndef BREAL_HPP
@@ -173,8 +175,8 @@ inline bool operator>=(const Breal x, const double w){ Breal y; y = w; return x 
 inline bool operator>=(const double w, const Breal y){ Breal x; x = w; return x >= y; }
 
 
-const u64 B2real_min_a = 1;
-const i64 B2real_min_b = - ((u64) 1 << 63);
+const u64 B2real_min_a = 0;
+const i64 B2real_min_b = - ((u64) 1 << 62);
  
 // Class B2real
 class B2real { 
@@ -224,11 +226,13 @@ class B2real {
 };
 
 inline void B2real::set_log (double z)     { // Assumes z is the natural log of the number to be represented.
+	if (z == -INFINITY){ a = B2real_min_a; b = B2real_min_b; return; }	
 	b = (i64)(z * log2 (exp (1.0))) - 62; a = (i64) exp (z - ((double)b) * log (2.0));
 	while   (a & 0x8000000000000000) { a >>= 1; b++; }
 	while (!(a & 0x4000000000000000)){ a <<= 1; b--; }
 }
 inline void B2real::set_logl(long double z){ // Assumes z is the natural log of the number to be represented.
+	if (z == -INFINITY){ a = B2real_min_a; b = B2real_min_b; return; }	
 	b = (i64)(z * log2l(expl(1.0))) - 62; a = (i64) expl(z - b * logl(2.0));
 	while   (a & 0x8000000000000000) { a >>= 1; b++; }
 	while (!(a & 0x4000000000000000)){ a <<= 1; b--; }
@@ -242,10 +246,10 @@ inline void B2real::set(i64 z){
 }
 inline void   B2real::set(double z)     { if (z <= (double) 0.0){ set((i64) 0);} else set_log (log (z)); }
 inline void   B2real::set(long double z){ if (z <= (long double) 0.0){ set((i64) 0);} else set_logl(logl(z)); }
-inline double B2real::get_log()         { return (double)(log(a) + b*log(2.0)); }
-inline double B2real::get_double()      { return (double)(a * pow(2, b)); }
-inline long double B2real::get_ldouble(){ return (long double)((long double)(a) * powl(2, (long double)(b))); }
-inline i64 B2real::get_lint()       { i64 aL = a; if (b >= 0) return aL << b; return aL >> -b; }
+inline double B2real::get_log()         { if (b <= -(1LL << 62)) return -INFINITY; else return (double)(log(a) + b*log(2.0)); }
+inline double B2real::get_double()      { if (b <= -(1LL << 62)) return 0.0; else return (double)(a * pow(2, b)); }
+inline long double B2real::get_ldouble(){ if (b <= -(1LL << 62)) return 0.0; else return (long double)((long double)(a) * powl(2, (long double)(b))); }
+inline i64 B2real::get_lint()      	    { i64 aL = a; if (b >= 0) return aL << b; return aL >> -b; }
 
 
 inline B2real operator+(B2real x, B2real y){ // Could speed up this by 20 % using certain assumptions.

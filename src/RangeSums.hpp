@@ -1,5 +1,5 @@
 //
-// 10 June 2025, Mikko Koivisto
+// 29 Nov 2025
 //
 // Class RangeSums implements data structures to support the following queries: 
 // - sum	: returns a sum of weights over a constrained collection of sets
@@ -41,7 +41,7 @@ class RangeSums {
 		void	init	(int n0)	{ n = n0; wsco64.clear(); wsco256.clear(); wsco1024.clear(); }
 		int		size	()			{ return wsco64.size() + wsco256.size() + wsco1024.size(); }
 		void	print	();														// Prints out the score list; currently just weights.
-		void 	pjkl	(ofstream &f);
+		void 	pjkl	(ofstream& f, vint& can);
 		
 		void	insert	(const vint& set, double logval);
 		void	srt		();														// Sorts the list in decreasing order by weight.
@@ -80,22 +80,30 @@ void RangeSums::print(){
 		cerr << endl;	
 	} 
 }
-void RangeSums::pjkl(ofstream &f){
+void RangeSums::pjkl(ofstream &f, vint &candi){
 	using namespace std;
-	f << id << " " << size() << endl;
+	//f << id << " " << size() << endl; // Don't print the size here, but in the calling function. 
 	if (n <= 64){
 		for (auto &x : wsco64){ 
-			f << x.weight.get_log() << " "; 
+			f << FIXED_F(x.weight.get_log(), 12, 4) << " "; 
 			vint v = make_vint(x.set, n);
-			f << v.size(); for (auto y : v) f << " " << y;
+			f << v.size(); for (auto y : v) f << " " << candi[y];
 			f << endl;
 		}
 	}
-	else if (n <= 1024){
-			for (auto &x : wsco1024){ 
-			f << x.weight.get_log() << " "; 
+	else if (n <= 256){
+		for (auto &x : wsco256){ 
+			f << FIXED_F(x.weight.get_log(), 12, 4) << " "; 
 			vint v = make_vint(x.set, n);
-			f << v.size(); for (auto y : v) f << " " << y;
+			f << v.size(); for (auto y : v) f << " " << candi[y];
+			f << endl;
+		}
+	}	
+	else if (n <= 1024){
+		for (auto &x : wsco1024){ 
+			f << FIXED_F(x.weight.get_log(), 12, 4) << " "; 
+			vint v = make_vint(x.set, n);
+			f << v.size(); for (auto y : v) f << " " << candi[y];
 			f << endl;
 		}
 	} 
@@ -163,6 +171,7 @@ vint RangeSums::rnd(const vint& L, const vint& U){
 
 template<class T> double RangeSums::scansum(const vsw<T>& s, const vint& Lv, const vint& Uv){
 	T L = make_bitset<T>(Lv), U = make_bitset<T>(Uv);
+	if ( !EMPTY_OR_INTERSECTS(L, U) ) return -INFINITY; // No contributions from the list.
 	int m = nsorted;
 	Treal sum, factor, slack; slack = delta / (m + 1.0);
 	int i = 0, count = 0;
@@ -185,6 +194,7 @@ template<class T> double RangeSums::scansum(const vsw<T>& s, const vint& Lv, con
 }
 template<class T> double RangeSums::scansum(const vsw<T>& s, const vint& Lv, const vint& Uv, double bsum){
 	T L = make_bitset<T>(Lv), U = make_bitset<T>(Uv);
+	if ( !EMPTY_OR_INTERSECTS(L, U) ) return bsum; // No contributions from the list.
 	int m = nsorted;
 	Treal sum; sum.set_log(bsum); Treal factor, slack; slack = delta / (m + 1.0);
 	int i = 0, count = 0;

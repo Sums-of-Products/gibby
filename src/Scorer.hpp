@@ -1,5 +1,5 @@
 //
-// 25 Mar 2025, Mikko Koivisto
+// 2 Dec 2025
 //
 
 #ifndef Scorer_HPP
@@ -21,8 +21,8 @@ class Scorer {
 	
 				void	pjkl  (const string& fname);								// Write scores to a jkl file.
 				void	rjkl  (const string& fname);								// Read scores, n, maxind from a jkl file.
-				void	build (int maxd);											// Assumes a data file already read.
-				void	set_mid(int val){ maxind = val; }
+				void	build ();													// Assumes a data file already read.
+				void	set_mid(int vr, int vs){ maxindr = vr; maxinds = vs; }
 				void	set_eps(double val){ eps = val; }
 				void	set_can(int val){ maxncan = val; }
 				void	set_mem(int val){ maxmem = val; }
@@ -52,7 +52,8 @@ class Scorer {
 		std::vector<RangeSums>						r;				// A RangeSums object per node, contained by candidate parents.
 		std::vector<RangeSums>						s;				// A RangeSums object per node, not contained by candidate parents. 
 
-		int											maxind = 1;		// Shape parameter: maximum indegree. "-maxind ..."
+		int											maxindr = 1;	// Shape parameter: maximum indegree. "-maxind ..."
+		int											maxinds = 1;	// Shape parameter: maximum indegree. "-maxind ..."
 		double										eps = 0.001;	// Accuracy parameter: "-a ..."
 		int											maxncan = 64; 	// Maximum number of candidate parents per node.
 		int											maxmem = 16;	// Maximum amount of memory available in GiB.
@@ -69,6 +70,7 @@ class Scorer {
 		void dfs				(int i, int k, int fel, vint& set);	
 		int  bottom_up_can		(int i, int maxd);	
 		int  bottom_up_all		(int i, int maxd);	
+		int  bottom_up			(int i, int maxd, bool withincan);	
 		void test_sampling		(int i);
 };
 
@@ -79,56 +81,96 @@ using Scorer_ptr = std::shared_ptr<Scorer>;		// A typedef.
 void Scorer::pjkl(const string& fname){
 	using namespace std;
 	cerr << "\t Start writing file " << fname << endl;
+	int wroter = 0, wrotes = 0;
+	vint idmap(n); for (int j = 0; j < n; j++) idmap[j] = j; // A simple idendity mapping.
 	ofstream f; f.open(fname); if (f.fail()){ cerr << " Error in opening file: " << fname << " Exit now." << endl; exit(1); }
-	f << n << endl;	// Number of nodes
-	for (int i = 0; i < n; ++i) r[i].pjkl(f);
+	f << n << endl;	// Number of nodes.
+	for (int i = 0; i < n; ++i){
+		int mi = (int) s[i].size(); wrotes += mi; wroter += (int) r[i].size();
+		int si = (int) can[i].size();
+		if (si) mi += 1 + r[i].size();
+		f << i << " " << mi << endl; // Number of lines for the node in question.
+		if (si){
+			f << 0.0f << " " << -si;
+			for (auto j : can[i]) f << " " << j; 
+			f << endl;
+			r[i].pjkl(f, can[i]);
+		}	
+		s[i].pjkl(f, idmap);
+		//cerr << " Wrote s[" << i << "], size = " << (int) s[i].size() << endl;
+	}
 	f.close();
-	cerr << "\t File successfully written." << endl;
+	cerr << "\t File successfully written: " << wroter << " + " << wrotes << " scores." << endl;
 }
 
+// Reads a jkl file. Prunes (more / again) if pruning set on.
+//
 void Scorer::rjkl(const string& fname){
 	using namespace std;
+	freadonly = true; // Since a jkl file was given, we assume there is no data file given from which new scores could be computed.
 	cerr << "\t Start reading file " << fname << endl;
 	ifstream f; f.open(fname); if (f.fail()){ cerr << " Error in opening file: " << fname << " Exit now." << endl; exit(1); }
 	vstr lines; for (string line; getline(f, line); ) lines.push_back(line); f.close();
 	int state = 0; int i = 0; int mi = 0; int t = 0; double z = 0; vint p; int k = 0; int j = 0;
-	maxind = 0; int nlines = 0;
+	maxindr = 0; maxinds = 0; 
+	int nlines = 0; int readr = 0, reads = 0;
 	for (auto& x : lines){
 		sstream ss(x); double y;
 		while (ss >> y){
 			//cerr << " . . read " << y << "; state = " << state << endl;
 			switch (state){
-			 case 0: n = (int) y; p.reserve(n); r.resize(n); s.resize(n); can.resize(n);
+			 // Number of nodes
+			 case 0: n = (int) y; p.reserve(n); r.resize(n); s.resize(n); can.resize(n); nac.resize(n * n);
 			 		for (int v = 0; v < n; v++){ 
 						can[v].resize(0);
 			 			r[v].init(0); r[v].id = v;
 			 			s[v].init(n); s[v].id = v;
 			 		}
 			 		state = 1; break;
+			 // Node
 			 case 1: i = (int) y; state = 2; break;
+			 // Number of parent sets
 			 case 2: mi = (int) y; t = 0; state = 3; break;
+			 // Score
 			 case 3: z = y; t++; p.resize(0); state = 4; break;
-			 case 4: k = (int) y; j = 0; maxind = max(maxind, k); if (k == 0) state = 6; else state = 5; break;
-			 case 5: p.push_back((int) y); j++; if (j == k) state = 6; break;
+			 // Number of parents. If negative, the following parents are the candidate parents (the score is irrelevant). 
+			 case 4: k = (int) y; j = 0; if (k == 0) state = 6; else state = 5; break;
+			 // Parent
+			 case 5: p.push_back((int) y); j++; if (j == abs(k)) state = 6; break;
 			 default: break;
 			}
 		}
 		if (state == 6){ // p is the parent set of i with score z.
-			// Store to fscores and r[i].
-			vint famkey = p; famkey.push_back(i);
-			fscores.insert({ famkey, z });
-			s[i].insert(p, z);
-			if (t == mi) state = 1; else state = 3;
+			if (k < 0){ // Actually, read the candidate parents for i.
+				can[i] = p; r[i].init(abs(k));
+				for (int c = 0; c < abs(k); c++){ int j = can[i][c]; nac[i * n + j] = c + 1; } // Note: c+1 encodes c. 			
+			} else { 
+				// Store to fscores and to r[i] or s[i]. MUST USE the original node IDs.
+				vint famkey = p; famkey.push_back(i);
+				fscores.insert({ famkey, z });
+				bool tor = incan(i, p);
+				if (tor){
+					maxindr = max(maxindr, k); readr++;
+					if (pruning == 0) r[i].insert(tocan(i, p), z);
+				} else {
+					maxinds = max(maxinds, k); reads++;
+					if (pruning == 0) s[i].insert(p, z);				
+				}
+			}
+			if (t == mi){ // All scores read for i.
+				state = 1;
+				if (pruning && can[i].size()) bottom_up_can(i, maxindr); 
+				if (pruning) bottom_up_all(i, maxinds);
+				r[i].srt(); s[i].srt(); 
+			} else state = 3;
 		}
 		nlines++;
-		//if (nlines > 100) break; // For debugging.
 	}
-	// Sort all s[i].
-	for (auto& si : s) si.srt();
-	cerr << "\t File successfully read." << endl;
+	cerr << "\t File successfully read: n = " << n << ", maxindr = " << maxindr << ", maxinds = " << maxinds; 
+	cerr << ", number of scores read = " << nlines << " = " << readr << " + " << reads << "." << endl;
 }
 
-void Scorer::build(int maxd){
+void Scorer::build(){
 	using namespace std;
 	// Set the array needed for the prior here.
 	lpr.resize(n); 
@@ -141,9 +183,8 @@ void Scorer::build(int maxd){
 		}		
 	}	
 	
-	if (maxd == 0) maxd = maxind;
-	//eps = 0.001;
-	std::cerr << "\t Scorer::build: pruning = " << pruning << ", maxd = " << maxd << ", eps = " << eps << "\n";
+	cerr << "\t Scorer::build: pruning = " << pruning << " number of candidates = " << maxncan;
+	cerr << ", maxindr = " << maxindr << ", maxinds = " << maxinds << ", eps = " << eps << endl;
 	
 	// Select candidate parents.
 	select_can();
@@ -156,27 +197,29 @@ void Scorer::build(int maxd){
 		r[i].init(can[i].size()); r[i].id = i; 			// Init a RangeSums object with the given ground set size.
 		s[i].init(n);             s[i].id = i; 			// Init a RangeSums object with the given ground set size.		
 		if (pruning){									// Alternative to add_all...
-			count1 += bottom_up_can(i, maxd);			// Builds r[i].		
-			if (maxncan < n-1) bottom_up_all(i, maxd);	// Builds s[i].
-		} else add_all_small_sets(i, maxd);
+			int ncand = can[i].size();
+			if (ncand) count1 += bottom_up_can(i, maxindr);// Build r[i].		
+			if (ncand < n-1) count1 += bottom_up_all(i, maxinds);	// Build s[i].
+		} else add_all_small_sets(i, maxinds);
 		r[i].srt(); s[i].srt();
-		//if (i == 0){ r[i].print(); s[i].print(); }
-		
-		count2 += r[i].size();
+		count2 += r[i].size(); count2 += s[i].size();
 	}
 	double countt = 0;
-	for (int t = 0; t <= maxd; t++) countt += n * exp( lgamma(maxncan + 1) - lgamma(t + 1) - lgamma(maxncan - t + 1) );
+	for (int t = maxinds; t <= maxindr; t++) countt += n * exp( lgamma(maxncan + 1) - lgamma(t + 1) - lgamma(maxncan + 1 - t) );
+	for (int t = 0;       t <= maxinds; t++) countt += n * exp( lgamma(n          ) - lgamma(t + 1) - lgamma(n           - t) );	
+	
 	double pr = 100.0 * count2/countt;
-	std::cerr << "\n\t Scorer::build – done. Computed " << std::max(count1, count2) << " scores out of the total " << (u64) countt << "; "; 
-	std::cerr << count2 << " (" << FIXED_F(pr, 6, 4) << "%) left after pruning.\n\n";
+	cerr << "\n\t Scorer::build – done. Computed " << std::max(count1, count2) << " scores out of the total " << (u64) countt << "; "; 
+	cerr << count2 << " (" << FIXED_F(pr, 6, 3) << "%) left after pruning." << endl;
 
+	// Testing...
 	//test_sampling(0);
 }
 
 // Currently simply takes the top parents based on pairwise scores.
 //
 void Scorer::select_can(){
-	if (maxncan > n - 1 || maxncan <= 0) maxncan = n - 1;
+	if (maxncan > n - 1 || maxncan <= 0) maxncan = 0; // n - 1;
 	can.resize(n);
 	nac.resize(n * n);
 	// For each node, compute n - 1 scores and sort the parent nodes accordingly.
@@ -191,6 +234,9 @@ void Scorer::select_can(){
 		// Trim by moving the tail forward starting with the position of i.
 		int t = 0; while (par[t].p != i) t++;
 		for ( ; t < n - 1; t++) par[t] = par[t + 1];
+		// Sort the first maxncan elements of par to increasing order ny node id.
+		sort(par.begin(), par.begin() + maxncan, [](const pw& a, const pw& b){ return a.p < b.p; });
+		// Create can and nac.
 		can[i].resize(maxncan);
 		for (int t = 0; t < maxncan; t++){ int j = par[t].p; can[i][t] = j; nac[i * n + j] = t + 1; } // Note: t+1 encodes t. 
 	}
@@ -199,7 +245,8 @@ void Scorer::select_can(){
 void Scorer::dfs(int i, int k, int firstelem, vint& set){
 	//sfam(i, set);	
 	Tscore w = sfam(i, set);	
-	r[i].insert(tocan(i, set), w);
+	//r[i].insert(tocan(i, set), w);
+	s[i].insert(set, w);
 	if (k > 0){ 
 		for (int j = firstelem; j < n; j++){
 			if (j == i) continue;
@@ -214,156 +261,96 @@ void Scorer::add_all_small_sets(int i, int maxd){
 	dfs(i, maxd, 0, set);			// Knows n, knows the vector r.	
 }
 
+// Insert to r[i].
+int Scorer::bottom_up_can(int i, int maxd){
+	return bottom_up(i, maxd, true);
+}
+// Insert to s[i].
+int Scorer::bottom_up_all(int i, int maxd){
+	return bottom_up(i, maxd, false);
+}
 #define PRUNE_WEIGHT(v, r, s)	( pow(1 + 1.0f/v, r - v) * pow((float) v, r - s) )
 #define LOG_PRW(v, r, s)		( (r - v) * log1p(1.0/v) + (r - s) * log((double) v) )
 
-// Speed
-//							All scores + pruning	bottom-up-all-scores		pjkl
-//	Alarm1000, maxind=5: 	2 min 19 seconds		1 min 10 seconds			29 seconds
-//
-int Scorer::bottom_up_can(int i, int maxd){
+// Prunes and inserts to either r[i] or s[i], depending on the withincan argument.
+int Scorer::bottom_up(int i, int maxd, bool withincan){
 	using namespace std;
 	using Treal = B2real;
 	
-	const int membudget = maxmem * (1ULL << 24); // Per node (each taking about 32 bytes).
-	int ni = can[i].size(); int lmaxd = maxd; // Lower maxd if needed.
-	while (lgamma(ni) - lgamma(ni - lmaxd) - lgamma(lmaxd + 1) > log(membudget)) lmaxd--;
+	vint candi;
+	if (withincan) candi = can[i];
+	else { candi.resize(n); for (int j = 0; j < n; j++) candi[j] = j; } // The identity mapping.
+	int ni = candi.size(); if (!withincan) ni--;
 	
-	cerr << "\t max " << lmaxd << " parents, out of " << setw(3) << ni << " candidates";
-	
-	int count = 0; int count2 = 0;
-	UMAP < vint, Treal, vinthas >  			h; 
-	UMAP < vint, Treal, vinthas >::iterator	hit;		
-	
-	std::deque<vint> q;
-	
-	vint J;	// The parent set of i. Empty first.
-	Tscore sco = sfam(i, J);
-	r[i].insert(J, sco);
-	Treal  rea; rea = sco;
-	h.insert({ J, rea });
-	q.push_back(J);
-	count++; count2++;
-	while (!q.empty()){
-		// Get next J and handle it.
-		J = q.front(); q.pop_front();
-		
-		// Generate successors of J.
-		for (auto j : can[i]){	// Loop over the candidate parents of i.
-			bool invalid = (j == i);
-			for (auto x : J) invalid = ( invalid || (j == x) );
-			if (invalid) continue; // Skip if t already in J.
-			vint K; insert_sorted(j, J, K); // 
-			int k = K.size();
-
-			if (h.find(K) == h.end()){ // Not in the cache.
-				Tscore sco = sfam(i, K, false);
-				Treal   fK; fK.set_log(sco);
-				h.insert({ K, fK });
-
-				// Consider pruning, i.e., not adding to r[i].
-				// Compare s to a weighted sum of subsets R of K.
-				vector<Treal> prw(k+1); for (int r = 1; r < k+1; r++) prw[r].set_log(LOG_PRW((ni), r, k)); 
-				
-				Treal wsum0; wsum0 = fK * prw[k]; // Note: K is the seed for all sums.
-				vector<Treal> wsum(n); for (int x = 0; x < n; x++) wsum[x] = wsum0;
-				vint R; R.reserve(k);
-				for (u32 mask = 1; mask < (1UL << k) - 1; mask++){ // Note: K excluded.
-					int r = bitcount(mask); R.clear();
-					for (int t = 0; t < k; t++) if (mask & (1 << t)) R.push_back(K[t]);
-					Treal fR; hit = h.find(R);
-					if (hit == h.end()){ Tscore sR = sfam(i, R, false); fR.set_log(sR); h.insert({ R, fR }); } 
-					else fR= hit->second;
-					Treal w; w = fR * prw[r];
-					for (auto x : R) wsum[x] += w;	// Only add to the sum for x that belongs to R.
-				}
-				// Ready for the actual comparison and possible pruning.
-				bool pruneit = true; // This will change if the condition not satisfied for all x in K.
-				fK = fK * (1.0/eps);
-				for (auto x : K) pruneit = pruneit && (fK < wsum[x]);
-				if (!pruneit){ vint S = tocan(i, K); r[i].insert(S, sco); count2++; } // Note: add S instead of K.
-				if (k < lmaxd && (pruning == 1 || !pruneit)) q.push_back(K);
-				count++;
-			}
-		}
-	}
-	if (cscores.size() > membudget/8){ cscores.clear(); cerr << " clear cache"; } else {cerr << "  keep cache"; }
-	cerr << " ...computed " << setw(9) << count << " scores, " << setw(7) << count2 << " (" << FIXED_F((100.0*count2)/count, 5, 2) << " %) after pruning" << endl;
-	return count;
-}
-
-// Insert to s[i].
-//
-int Scorer::bottom_up_all(int i, int maxd){
-	using namespace std;
-	using Treal = B2real;
-	
-	const int membudget = maxmem * (1ULL << 25); // Total budget for local scores (each taking about 32 bytes).
-	int ni = n - 1;
+	const long int membudget = (int64_t) maxmem * (1ULL << 29); // Total budget for local scores (each taking about 32 bytes).	
 	int lmaxd = maxd; // Lower maxd if needed.
 	while (lgamma(ni) - lgamma(ni - lmaxd) - lgamma(lmaxd + 1) > log(membudget/n)) lmaxd--;
 	
-	cerr << "\t max " << lmaxd << " parents, out of " << setw(3) << ni << " candidates";
+	cerr << "\t Node " << i << ", max " << lmaxd << " parents, out of " << setw(3) << ni << " candidates";
 	
 	int count = 0; int count2 = 0;
 	UMAP < vint, Treal, vinthas >  			h; 
 	UMAP < vint, Treal, vinthas >::iterator	hit;		
-	
 	std::deque<vint> q;
-	
 	vint J;	// The parent set of i. Empty first.
 	Tscore sco = sfam(i, J);
-	// s[i].insert(J, sco); // Don't include the empty set in s[i].
-	Treal  rea; rea = sco;
+	if (withincan) r[i].insert(J, sco); // Include the empty set in r[i].
+	else if (maxncan == 0) s[i].insert(J, sco); // Include the empty set in s[i] because nothing will be stored in r[i].
+	
+	Treal rea; rea = sco;
 	h.insert({ J, rea });
-	q.push_back(J);
-	count++;
+	q.push_back(J); count++;
 	while (!q.empty()){
 		// Get next J and handle it.
 		J = q.front(); q.pop_front();
 		// Generate successors of J.
-		for (int j = 0; j < n; j++){	// Loop over the candidate parents of i.
+		for (auto j : candi){	// Loop over the candidate parents of i.
 			bool invalid = (j == i);
 			for (auto x : J) invalid = ( invalid || (j == x) );
 			if (invalid) continue; // Skip if t already in J.
 			vint K; insert_sorted(j, J, K); // 
 			int k = K.size();
 			if (h.find(K) == h.end()){ // Not in the cache.
-				Tscore sco = sfam(i, K, false);
-				Treal   fK; fK.set_log(sco);
-				h.insert({ K, fK });
-
-				// Consider pruning, i.e., not adding to s[i].
-				// Compare to a weighted sum of subsets R of K.
-				vector<Treal> prw(k+1); for (int r = 1; r < k+1; r++) prw[r].set_log(LOG_PRW((n - 1), r, k)); 
-				
-				Treal wsum0; wsum0 = fK * prw[k]; // Note: K is the seed for all sums.
-				vector<Treal> wsum(n); for (int x = 0; x < n; x++) wsum[x] = wsum0;
-				vint R; R.reserve(k);
-				for (u32 mask = 1; mask < (1UL << k) - 1; mask++){ // Note: K excluded.
-					int r = bitcount(mask); R.clear();
-					for (int t = 0; t < k; t++) if (mask & (1 << t)) R.push_back(K[t]);
-					Treal fR; hit = h.find(R);
-					if (hit == h.end()){ Tscore sR = sfam(i, R, false); fR.set_log(sR); h.insert({ R, fR }); } 
-					else fR= hit->second;
-					Treal w; w = fR * prw[r];
-					for (auto x : R) wsum[x] += w;	// Only add to the sum for x that belongs to R.
-				}
-				// Ready for the actual comparison and possible pruning.
 				bool pruneit = true; // This will change if the condition not satisfied for all x in K.
-				fK = fK * (1.0/eps);
-				for (auto x : K) pruneit = pruneit && (fK < wsum[x]);
-				if (!pruneit && !incan(i, K)){ s[i].insert(K, sco); count2++; } // Note: add S instead of K.
+				Tscore sco = sfam(i, K, false);
+				if (sco != -infdouble){
+					Treal fK; fK.set_log(sco);
+					h.insert({ K, fK });
+
+					// Consider pruning, i.e., not adding to list[i].
+					// Compare to a weighted sum of subsets R of K.
+					vector<Treal> prw(k+1); for (int r = 1; r < k+1; r++) prw[r].set_log(LOG_PRW((ni), r, k)); 
+				
+					Treal wsum0; wsum0 = fK * prw[k]; // Note: K is the seed for all sums.
+					vector<Treal> wsum(n); for (int x = 0; x < n; x++) wsum[x] = wsum0;
+					vint R; R.reserve(k);
+					for (u32 mask = 1; mask < (1UL << k) - 1; mask++){ // Note: K excluded.
+						int r = bitcount(mask); R.clear();
+						for (int t = 0; t < k; t++) if (mask & (1 << t)) R.push_back(K[t]);
+						Treal fR; hit = h.find(R);
+						if (hit == h.end()){ Tscore sR = sfam(i, R, false); fR.set_log(sR); h.insert({ R, fR }); } 
+						else fR= hit->second;
+						Treal w; w = fR * prw[r];
+						for (auto x : R) wsum[x] += w;	// Only add to the sum for x that belongs to R.
+					}
+					// Ready for the actual comparison and possible pruning.
+					fK = fK * (1.0/eps);
+					for (auto x : K) pruneit = pruneit && (fK < wsum[x]);				
+					if (!pruneit){
+						if (withincan){ r[i].insert(tocan(i, K), sco); count2++; }
+						else if (!incan(i, K)){ s[i].insert(K, sco); count2++; }
+					}
+				}
 				if (k < lmaxd && (pruning == 1 || !pruneit)) q.push_back(K);
 				count++;
 			}
 		}
 	}
-	if (cscores.size() > membudget/32){ cscores.clear(); cerr << " clear cache"; } else {cerr << "  keep cache"; }
+	if ((int64_t) cscores.size() > (int64_t) maxmem << 20){ cscores.clear(); cerr << " clear cache"; } else {cerr << "  keep cache"; }
 	cerr << " ...computed " << setw(9) << count << " scores, " << setw(7) << count2 << " (" << FIXED_F((100.0*count2)/count, 5, 2) << " %) after pruning" << endl;
+	//cerr << " cscores.size() = " << (int) cscores.size() << ", membudget = " << (long int) membudget << endl;
 	return count;
 }
-
 
 void Scorer::info(){
 	using namespace std;
@@ -396,7 +383,7 @@ void Scorer::srt(int i){
 }
 
 inline double Scorer::prio(int k){
-	if (k > maxind) return -infdouble;
+	if (k > maxindr) return -infdouble;
 	return lpr[k];
 }
 
@@ -405,27 +392,25 @@ double Scorer::sfam(int i, const vint& P){
 }
 double Scorer::sfam(int i, const vint& P,  bool store){ 
 	using namespace std;
-	if ((int) P.size() > maxind) return -infdouble;
-	
+	if ((int) P.size() > maxindr) return -infdouble;
+//	cerr << "a";
 	// Check if the score is already in the cache.
 	vint famkey = P; famkey.push_back(i);
 	it = fscores.find(famkey);
+//	cerr << "b";
 	if (it != fscores.end()) return it->second;	// It was in the cache!
 	if (freadonly) return -infdouble; // Not computing any new scores; impossible parent set.
-		
+//	cerr << "c";
 	// Construct the larger clique C.
 	vint C; insert_sorted(i, P, C);
 	
 	// Get the score of C. 
 	double retval =  scli(C) - scli(P) + prio(P.size());	
-	
 	// Insert to the caches.
-	if (store /*&& (int) P.size() < 4*/){ 
-		
+	if (store /*&& (int) P.size() < 4*/){ 	
 		fscores.insert({ famkey, retval }); 
 		//if (!incan(i, P)) s[i].insert(P, retval);
 	}
-	
 	return retval;
 }
 
@@ -461,28 +446,46 @@ double Scorer::sum(int i, const vint& L, const vint& U, double delta){
 	return sum(i, L, U); 
 }
 
+// The following functions, sum and cum, only work for sums over the set interval [L, U]. 
+/*
 double Scorer::sum(int i, const vint& L, const vint& U){ 
 	if (!incan(i, L)) return s[i].sum(L, U); // Because r[i] cannot contribute to the sum.
 	double rsum = r[i].sum(tocan(i, L), tocan(i, U));
-	/*
-	double ssum = s[i].sum(L, U);
-	double mini = std::min(rsum, ssum);
-	double maxi = std::max(rsum, ssum);
-	return maxi + log1p(exp(mini - maxi));
-	*/
 	return s[i].sum(L, U, rsum);
-
 }
 vint Scorer::cum(int i, const vint& L, const vint& U, double csum){ 
 	if (!incan(i, L)) return s[i].cum(L, U, csum); // Because r[i] cannot contribute to the sum.
 	double rsum = r[i].sum(tocan(i, L), tocan(i, U));
 	vint val;
 	if (csum <= rsum) val = tonac(i, r[i].cum(tocan(i, L), tocan(i, U), csum)); 
-	else 
-		//val = s[i].cum(L, U, csum + log1p(-exp(rsum - csum)));
-		val = s[i].cum(L, U, csum, rsum);
+	else val = s[i].cum(L, U, csum, rsum);
 	return val;
 }
+*/
+// The following functions, sum and cum, work for sums over subsets of U that intersect L. 
+// 
+double Scorer::sum(int i, const vint& L, const vint& U){ 
+	if (L.size()){
+		vint Lr = tocan(i, L);
+		if (Lr.size()) return s[i].sum(L, U, r[i].sum(Lr, tocan(i, U))); 
+		else return s[i].sum(L, U); 
+	} else return s[i].sum({ }, U, r[i].sum({ }, tocan(i, U))); 
+}
+vint Scorer::cum(int i, const vint& L, const vint& U, double csum){ 
+	if (L.size()){
+		vint Lr = tocan(i, L);
+		if (Lr.size()){ 
+			double rsum = r[i].sum(Lr, tocan(i, U));
+			if (csum <= rsum) return tonac(i, r[i].cum(Lr, tocan(i, U), csum));
+			else return s[i].cum(L, U, csum, rsum); 
+		} else return s[i].cum(L, U, csum); 
+	} else {
+		double rsum = r[i].sum({ }, tocan(i, U));
+		if (csum <= rsum) return tonac(i, r[i].cum({ }, tocan(i, U), csum));
+		else return s[i].cum({ }, U, csum, rsum);
+	}	 
+}
+
 vint Scorer::rnd(int i, const vint& L, const vint& U){ 
 	std::cerr << " ERROR: Scorer::rnd not implemented. Exit now." << endl; exit(1);
 	return tonac(i, r[i].rnd(tocan(i, L), tocan(i, U))); 
@@ -490,6 +493,22 @@ vint Scorer::rnd(int i, const vint& L, const vint& U){
 
 void Scorer::test_sampling(int i){
 	using namespace std;
+	
+	cerr << " Test: i = " << i << endl;
+	if ((int) can[i].size() > 5){
+		vint U(can[i].begin(), can[i].begin()+5);
+		vint L = {3, 5, 7};
+		for (auto x : U){ cerr << " " << x; } cerr << " = U" << endl;
+		if (L.size()){
+			cerr << " L.size() != 0" << endl;
+			vint Lr = tocan(i, L);
+			for (auto x : Lr){ cerr << " " << x; } cerr << " = Lr" << endl;
+		
+		}
+	}
+	
+	exit(1);
+	
 	r[i].print(); 
 	//s[i].print();
 	cerr << "can[i]:";
