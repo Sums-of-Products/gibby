@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
         else if (arg == "-FBM"      && i + 1 < argc) gibby_iter = std::atoi(argv[++i]);
         else if (arg == "-REV"      && i + 1 < argc) rev_iter = std::atoi(argv[++i]);
         else if (arg == "-MBR_id"   && i + 1 < argc) mbr_id_iter  = std::atoi(argv[++i]);
-        else if (arg == "-MBR_rev"  && i + 1 < argc) mbr_rev_iter = std::atoi(argv[++i]);
+        else if (arg == "-MBR"  && i + 1 < argc) mbr_rev_iter = std::atoi(argv[++i]);
         else if (arg == "-MBR_rnd"  && i + 1 < argc) mbr_rnd_iter = std::atoi(argv[++i]);
         else if (arg == "-O"        && i + 1 < argc) parent_scores_file = argv[++i];
         else if (arg == "-e"        && i + 1 < argc) ess = std::stod(argv[++i]);
