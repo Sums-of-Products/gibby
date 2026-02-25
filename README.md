@@ -25,7 +25,7 @@ The only mandatory parameter is the data file or the local scores file in .jkl f
 ./gibby  data/asia1k.dat 
 ```
 
-Currently, Gibby can generate scores only from discrete data, scored using the BDeu system. We recommend using [GOBNILP](https://benchpressdocs.readthedocs.io/en/latest/structure_learning_algorithms/gobnilp.html)) to generate local score files for continuous data. 
+Currently, Gibby can generate scores only from discrete data, scored using the BDeu system. We recommend using [GOBNILP](https://benchpressdocs.readthedocs.io/en/latest/structure_learning_algorithms/gobnilp.html) to generate local score files for continuous data. 
 
 ### Optional Parameters
 
