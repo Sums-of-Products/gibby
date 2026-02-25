@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
 
     bool shortcut_mode = false;
     std::string datafile;
+    datafile = argv[1];
 
     int iter = -1;
     int burn_in_iter = -1;
@@ -65,12 +66,27 @@ int main(int argc, char* argv[]) {
     std::string parent_scores_file = "";
     int seed_value = 0;
     int iMAD = 0;
+    if (datafile.size() < 4 || datafile.substr(datafile.size() - 4) != ".jkl") {
+        // Read the first line to count columns = number of nodes
+        std::ifstream f(datafile);
+        if (!f) {
+            std::cerr << "Cannot open data file: " << datafile << "\n";
+            return 1;
+        }
+        std::string line;
+        int n_nodes = 0;
+        if (std::getline(f, line)) {
+            std::istringstream ss(line);
+            std::string token;
+            while (ss >> token) ++n_nodes;
+        }
 
-    // =======================
-    // Argument parsing
-    // =======================
+        // Set max in-degree defaults if needed
+        if (max_indegree1 == -1) max_indegree1 = n_nodes - 1;
+        if (max_indegree2 == -1) max_indegree2 = max_indegree1;
+    }
     
-    datafile = argv[1];
+    
     for (int i = 2; i < argc; i++) {
         std::string arg = argv[i];
         if      (arg == "-iter"     && i + 1 < argc) iter = std::atoi(argv[++i]);
