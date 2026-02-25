@@ -45,7 +45,7 @@ Currently, Gibby can generate scores only from discrete data, scored using the B
 | `-FBM` | Number of Fast Basic Moves  per iteration | `10 000` |
 | `-REV` | Number of REV moves per iteration | `200` |
 | `-MBR` | Number of MBR moves per iteration | `100` |
-| `-iPPe` | Generates a file showing edge posterior probabilities every iPPE <n>  iterations | none |
+| `-iPPe` | Generates a file showing edge posterior probabilities every iPPE `<n>` iterations | none |
 
 
 ## Output Files
@@ -55,4 +55,4 @@ After execution, Gibby produces the following outputs:
 - **Sampled DAGs scores** — contains the sampled DAGs scores over iterations.
 - **Edge probability matrix** — contains the posterior probability of the edges  (row = parent, column = child).
 - **(Optional) Parent sets scores** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
-- **(Optional) Edge posterior probabilities per iPPE** — if -iPPE <n> is specified, Gibby generates a file showing edge posterior probabilities every n iterations.
+- **(Optional) Edge posterior probabilities per iPPE** — if -iPPE `<n>` is specified, Gibby generates a file showing edge posterior probabilities every n iterations.
