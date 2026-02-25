@@ -66,25 +66,38 @@ int main(int argc, char* argv[]) {
     std::string parent_scores_file = "";
     int seed_value = 0;
     int iMAD = 0;
-    if (datafile.size() < 4 || datafile.substr(datafile.size() - 4) != ".jkl") {
-        // Read the first line to count columns = number of nodes
+    int n_nodes = 0;
+
+    if (datafile.size() >= 4 && datafile.substr(datafile.size() - 4) == ".jkl") {
+        // Read the first line as n_nodes
+        std::ifstream f(datafile);
+        if (!f) {
+            std::cerr << "Cannot open .jkl data file: " << datafile << "\n";
+            return 1;
+        }
+        std::string line;
+        if (std::getline(f, line)) {
+            std::istringstream ss(line);
+            ss >> n_nodes;  // first number = n_nodes
+        }
+    } else {
+        // Read first line and count columns = n_nodes
         std::ifstream f(datafile);
         if (!f) {
             std::cerr << "Cannot open data file: " << datafile << "\n";
             return 1;
         }
         std::string line;
-        int n_nodes = 0;
         if (std::getline(f, line)) {
             std::istringstream ss(line);
             std::string token;
             while (ss >> token) ++n_nodes;
         }
-
-        // Set max in-degree defaults if needed
-        if (max_indegree1 == -1) max_indegree1 = n_nodes - 1;
-        if (max_indegree2 == -1) max_indegree2 = max_indegree1;
     }
+
+    // Now set default max indegree values
+    if (max_indegree1 == -1) max_indegree1 = n_nodes - 1;
+    if (max_indegree2 == -1) max_indegree2 = max_indegree1;
     
     
     for (int i = 2; i < argc; i++) {
@@ -118,7 +131,7 @@ int main(int argc, char* argv[]) {
     }
     
 
-    if (iter <= 0) iter = 10000;
+    if (iter < 0) iter = 10000;
     if (burn_in_iter < 0) burn_in_iter = std::max(1, iter / 10);
 
     if (seed_value == 0) {
@@ -147,7 +160,7 @@ int main(int argc, char* argv[]) {
 
     ds.init(datafile, true, user_params);
 
-    int n_nodes = ds.getn();
+    n_nodes = ds.getn();
     std::vector<std::vector<int>> adj(n_nodes, std::vector<int>(n_nodes, 0));
 
     std::string moves_tag = "";
