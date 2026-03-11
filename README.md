@@ -54,7 +54,8 @@ If you are only interested in the pruning algorithm, set `-O <filename>` to gene
 
 After execution, Gibby produces the following outputs:
 
+- **Sampled DAGs** — contains the sampled DAGs over iterations. Each DAG is listed as node–parent relationships in the format `node: parent1,parent2,...`. Nodes with empty parent sets are omitted.
 - **Sampled DAGs scores** — contains the sampled DAGs scores over iterations.
 - **Edge probability matrix** — contains the posterior probability of the edges  (row = parent, column = child).
-- **(Optional) Edge posterior probabilities per iPPE** — if -iPPE `<n>` is specified, Gibby generates a file showing edge posterior probabilities every n iterations.
+- **(Optional) Edge probability matrix per iPPE** — if -iPPE `<n>` is specified, Gibby generates a file showing edge posterior probabilities every n iterations.
 - **(Optional) Parent sets scores** — if `-O <filename>` is specified, Gibby also outputs the computed local scores in `.jkl` format.
