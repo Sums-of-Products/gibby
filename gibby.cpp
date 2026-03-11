@@ -175,10 +175,10 @@ int main(int argc, char* argv[]) {
     size_t lastdot = base_name.find_last_of(".");
     if (lastdot != std::string::npos) base_name = base_name.substr(0, lastdot);
 
-    std::string score_output     = "results/" + base_name + "_gibby_s_R" + std::to_string(seed_value) + "_" + moves_tag + ".txt";
-    std::string posterior_output = "results/" + base_name + "_gibby_p_R" + std::to_string(seed_value) + "_" + moves_tag + ".txt";
+    std::string score_output     = "results/" + base_name + "_gibby_scores_R" + std::to_string(seed_value) + "_" + moves_tag + ".txt";
+    std::string posterior_output = "results/" + base_name + "_gibby_ppe_R" + std::to_string(seed_value) + "_" + moves_tag + ".txt";
     std::string mad_output       = "results/" + base_name + "_gibby_iPPE_R" + std::to_string(seed_value) + "_" + moves_tag + ".txt";
-
+    std::string dags_file = "results/" + base_name + "_gibby_dags_R" + std::to_string(seed_value) + "_" + moves_tag + ".txt";
 
     // =======================
     // Prints
@@ -235,10 +235,11 @@ int main(int argc, char* argv[]) {
     std::cout << "│ \n";
     std::cout << "╭─────────────────────────────── Output files ───────────────────────────────────\n";
     std::cout << "│ \n";
+    std::cout << "│ Sampled DAGs -> " << dags_file << "\n";
     std::cout << "│ Sampled DAGs scores -> " << score_output << "\n";
     std::cout << "│ Edge probability matrix -> " << posterior_output << "\n";
     if (iMAD > 0)
-        std::cout << "│ MAD snapshots -> " << mad_output << " (every " << iMAD << " iters)\n";
+        std::cout << "│ Edge probability snapshots -> " << mad_output << " (every " << iMAD << " iters)\n";
     if (!parent_scores_file.empty())
         std::cout << "│ Parent sets scores ->  results/" << parent_scores_file << "\n";
     std::cout << "│ \n\n";
@@ -283,6 +284,12 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    std::ofstream dags_out(dags_file, std::ios::out | std::ios::trunc);
+    if (!dags_out) {
+        std::cerr << "Error opening dags file: " << dags_file << std::endl;
+        return 1;
+    }
+
     std::cout << " Starting main sampling phase..." << std::endl;
     int progress_interval = 100;
     for (int it = 0; it < iter; it++) {
@@ -302,6 +309,7 @@ int main(int argc, char* argv[]) {
         outfile << std::fixed << std::setprecision(4) << t << std::endl;
 
         add_post(ds, n_nodes, adj);
+        ds.dagp -> printDAG(dags_out);
 
         if (iMAD > 0 && (it + 1) % iMAD == 0) {
             append_adj_matrix(mad_file, adj, it + 1);
@@ -313,7 +321,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << std::endl;
     outfile.close();
-
+    dags_out.close();
     t_sampling_end = std::chrono::high_resolution_clock::now();
 
     save_matrix_to_file(adj, iter, posterior_output);
@@ -332,7 +340,7 @@ int main(int argc, char* argv[]) {
     if (iMAD > 0) mad_file.close();
 
     std::cout << "\n Sampling complete.\n\n";
-    std::cout << "Saved:\n  " << score_output << "\n  " << posterior_output;
+    std::cout << "Saved:\n  " << dags_file << "\n  " << score_output << "\n  " << posterior_output;
     if (iMAD > 0) std::cout << "\n  " << mad_output;
     std::cout << "\n\n";
 

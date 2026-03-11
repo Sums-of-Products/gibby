@@ -97,6 +97,7 @@ class DDAG {
 		void printA();
 		void printC();
 		void printP();
+		void printDAG(std::ostream& os);
 		void printR();
 		string strP();
 
@@ -395,13 +396,31 @@ void DDAG::printC(){
 	cout << "\n";
 }
 void DDAG::printP(){
-	using namespace std;
-	cout << "\tP/ \n";
-	for (int j = 0; j < n; j++){
-		int s = P[j].size();
-		cout << "\t" << j << ": "; for (int t = 0; t < s; t++){ cout << " " << P[j][t]; } cout << "\n";
-	}
-	cout << "\n";
+    using namespace std;
+
+    for (int j = 0; j < n; j++){
+        if (P[j].empty()) continue;  
+
+        int s = P[j].size();
+        cout << "\t" << j << ": ";
+        for (int t = 0; t < s; t++){
+            cout << " " << P[j][t];
+        }
+        cout << "\n";
+    }
+    cout << "\n";
+}
+void DDAG::printDAG(std::ostream& os){
+    for (int j = 0; j < n; j++){
+        if (P[j].empty()) continue;
+
+        os << "\t" << j << ": ";
+        for (size_t t = 0; t < P[j].size(); t++){
+            os << " " << P[j][t];
+        }
+        os << "\n";
+    }
+    os << "\n";
 }
 void DDAG::printR(){
 	using namespace std;
