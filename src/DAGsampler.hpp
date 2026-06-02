@@ -83,6 +83,7 @@ struct ARstat { // AR stands for Acceptance–Rejection.
 class DAGsampler {
 	public:
 		// The key high-level interface:
+		DDAG_ptr	dagp;				// Dynamic DAG, maintains the ancestor relation (in the dynamic mode)
 		void	init (const string& fname, bool fmode, const string& params);
 		void	init (const string& params);
 		string	info (int selection);
@@ -118,7 +119,6 @@ class DAGsampler {
 		double	gets();										// The score of the current DAG.
 
 	private:
-		DDAG_ptr	dagp;				// Dynamic DAG, maintains the ancestor relation (in the dynamic mode)
 		Scorer_ptr	scop;				// Pointer to a Scorer object, of either class BD or some other class derived from Scorer.
 		Gibby		gibby;				// The Gibby method for sampling node pairs. 
 		Parameters	parameters;
